@@ -5,7 +5,7 @@
  * Description: This plugin provides over 50,000 unique indexable web pages to your Wordpress Website!
  * Version: 1.0
  * Author: Web Source Group
- * Author URI: http://websourcegroup.com/
+ * Author URI: http://websourcegroup.com/seo-booster-rocket-wordpress-plugin-rocket-boost-seo-results/
  * License: GPL2
  */
 
