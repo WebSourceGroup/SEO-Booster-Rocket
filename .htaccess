@@ -2,4 +2,5 @@
 	RedirectMatch 403 smarty/.*$
 	RedirectMatch 403 templates/.*$
 	RedirectMatch 403 templates_c/.*$
+	RedirectMatch 403 .git/.*$
 </IfModule>
