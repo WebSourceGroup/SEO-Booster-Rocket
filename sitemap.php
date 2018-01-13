@@ -7,37 +7,37 @@
  *
  */
 
+define('WP_USE_THEMES', false);
+require_once("../../../wp-load.php");
+
 $sitemap = new SEO_Booster_Rocket_Sitemap;
 
 header("Content-type: text/xml");
 print $sitemap->retSiteMap();
 
 class SEO_Booster_Rocket_Sitemap {
-        private $connection;
+        private $db;
         function __construct() {
-                $this->connect();
-                $this->geo_path = 'https://usayo.ga/find-yoga-studio-by-geography/';
-        }
-        private function connect() {
-                $this->connection = mysql_connect("localhost","usayoga","fzxo83m4texo14r0m") or die("Cannot connect to database engine");
-                mysql_select_db("usayoga",$this->connection) or print("Cannot connect to database");
+		global $wpdb;
+                $this->db = $wpdb;
+                $this->geo_path = get_option('booster-rocket-maps-uri');
         }
         private function cleanVariable($var) {
-                return htmlspecialchars(mysql_real_escape_string(preg_replace('/\\\\/','',$var)));
+                return htmlspecialchars($this->db->_real_escape(preg_replace('/\\\\/','',$var)));
         }
         public function retCitiesShort() {
                 $results = Array();
-                $result = mysql_query("SELECT DISTINCT city,county,state_short FROM wsg_usa_yoga_geo ORDER BY city",$this->connection);
-                while($row = mysql_fetch_array($result)) {
-                        array_push($results,array('name'=>$row['city'],'url'=>$this->geo_path.$row['state_short']."/".$row['county']."/".$row['city']));
+                $result = $this->db->get_results("SELECT DISTINCT city,county,state_short FROM wsg_usa_yoga_geo ORDER BY city");
+		foreach($result as $res) {
+                        array_push($results,array('name'=>$res->city,'url'=>$_SERVER['SERVER_NAME'].$this->geo_path.$res->state_short."/".$res->county."/".$res->city));
                 }
                 return $results;
         }
         public function retCities() {
                 $results = Array();
-                $result = mysql_query("SELECT DISTINCT city,county,state_full FROM wsg_usa_yoga_geo ORDER BY city",$this->connection);
-                while($row = mysql_fetch_array($result)) {
-                        array_push($results,array('name'=>$row['city'],'url'=>$this->geo_path.$row['state_full']."/".$row['county']."/".$row['city']));
+                $result = $this->db->get_results("SELECT DISTINCT city,county,state_full FROM wsg_usa_yoga_geo ORDER BY city");
+		foreach($result as $res) {
+                        array_push($results,array('name'=>$res->city,'url'=>$_SERVER['SERVER_NAME'].$this->geo_path.$res->state_full."/".$res->county."/".$res->city));
                 }
                 return $results;
         }
