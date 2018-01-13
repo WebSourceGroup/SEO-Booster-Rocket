@@ -30,7 +30,7 @@ class SEO_Booster_Rocket_HTMLify {
 			$this->smarty->assign('mod',intval($cells_per_row));
 			$this->smarty->assign('results',array_filter($results));
 		        if(get_option('booster-rocket-powered-by')==1) {
-				$this->smarty->assign('powered_by','Powered by <a href="https://websourcegroup.com/" target="_blank">SEO Booster Rocket</a>, developed by <a href="https://websourcegroup.com/" target="_blank"><img src="'.WP_PLUGIN_URL.'/SEO-Booster-Rocket/images/Web-Source-Group-Logo.png" alt="Web Source Group - We Build Businesses with Technology" /></a>');
+				$this->smarty->assign('powered_by','Powered by <a href="https://websourcegroup.com/" target="_blank">SEO Booster Rocket</a>, developed by <a href="https://websourcegroup.com/" target="_blank"><img src="'.plugin_dir_url(__FILE__).'/images/Web-Source-Group-Logo.png" alt="Web Source Group - We Build Businesses with Technology" /></a>');
 			}
 			return $this->smarty->fetch(__DIR__.'/templates/htmlify.tpl');
 		}
@@ -379,13 +379,13 @@ function seo_booster_rocket_map( $atts ) {
 	if(isset($_GET['state']) && strlen($_GET['state']) > 0) { $state = htmlentities($_GET['state']); }
 
 	if(get_option('booster-rocket-powered-by')==1) {
-		$places->smarty->assign('powered_by','Powered by <a href="https://websourcegroup.com/" target="_blank">SEO Booster Rocket</a>, developed by <a href="https://websourcegroup.com/" target="_blank"><img src="'.WP_PLUGIN_URL.'/SEO-Booster-Rocket/images/Web-Source-Group-Logo.png" alt="Web Source Group - We Build Businesses with Technology" /></a>');
+		$places->smarty->assign('powered_by','Powered by <a href="https://websourcegroup.com/" target="_blank">SEO Booster Rocket</a>, developed by <a href="https://websourcegroup.com/" target="_blank"><img src="'.plugin_dir_url(__FILE__).'/images/Web-Source-Group-Logo.png" alt="Web Source Group - We Build Businesses with Technology" /></a>');
 	}
 
 	if(strlen($town) > 0 && strlen($state) > 0) {
 		$places = new SEO_Booster_Rocket_Places($town,$state);
 		if(get_option('booster-rocket-powered-by')==1) {
-			$places->smarty->assign('powered_by','Powered by <a href="https://websourcegroup.com/" target="_blank">SEO Booster Rocket</a>, developed by <a href="https://websourcegroup.com/" target="_blank"><img src="'.WP_PLUGIN_URL.'/SEO-Booster-Rocket/images/Web-Source-Group-Logo.png" alt="Web Source Group - We Build Businesses with Technology" /></a>');
+			$places->smarty->assign('powered_by','Powered by <a href="https://websourcegroup.com/" target="_blank">SEO Booster Rocket</a>, developed by <a href="https://websourcegroup.com/" target="_blank"><img src="'.plugin_dir_url(__FILE__).'/images/Web-Source-Group-Logo.png" alt="Web Source Group - We Build Businesses with Technology" /></a>');
 		}
 		$places->smarty->assign("search_term",htmlspecialchars($town).", ".htmlspecialchars($state));
 
@@ -419,27 +419,27 @@ function menu_seo_booster_rocket_admin_places_maps() {
 			$msg="";
 			$success=FALSE;
 			if(isset($_POST['booster-rocket-places-api-key'])) {
-				update_option('booster-rocket-places-api-key',$_POST['booster-rocket-places-api-key']);
+				update_option('booster-rocket-places-api-key',$seo_db->cleanVariable($_POST['booster-rocket-places-api-key']));
 				$msg="SEO Booster Rocket Options Saved.";
 				$success=TRUE;
 			}
 			if(isset($_POST['booster-rocket-maps-api-key'])) {
-				update_option('booster-rocket-maps-api-key',$_POST['booster-rocket-maps-api-key']);
+				update_option('booster-rocket-maps-api-key',$seo_db->cleanVariable($_POST['booster-rocket-maps-api-key']));
 				$msg="SEO Booster Rocket Options Saved.";
 				$success=TRUE;
 			}
 			if(isset($_POST['booster-rocket-maps-uri'])) {
-				update_option('booster-rocket-maps-uri',$_POST['booster-rocket-maps-uri']);
+				update_option('booster-rocket-maps-uri',$seo_db->cleanVariable($_POST['booster-rocket-maps-uri']));
 				$msg="SEO Booster Rocket Options Saved.";
 				$success=TRUE;
 			}
 			if(isset($_POST['booster-rocket-search-term'])) {
-				update_option('booster-rocket-search-term',$_POST['booster-rocket-search-term']);
+				update_option('booster-rocket-search-term',$seo_db->cleanVariable($_POST['booster-rocket-search-term']));
 				$msg="SEO Booster Rocket Options Saved.";
 				$success=TRUE;
 			}
 			if(isset($_POST['booster-rocket-cache-age'])) {
-				update_option('booster-rocket-cache-age',$_POST['booster-rocket-cache-age']);
+				update_option('booster-rocket-cache-age',$seo_db->cleanVariable($_POST['booster-rocket-cache-age']));
 				$msg="SEO Booster Rocket Options Saved.";
 				$success=TRUE;
 			}
@@ -552,7 +552,7 @@ function menu_seo_booster_rocket_admin_places_maps() {
 				<p>* We recommend restricting the Places API Key to your server address. This has been detected as: <b><? echo $_SERVER['SERVER_NAME']; ?></b> using the IP Address <b><? echo gethostbyname($_SERVER['SERVER_NAME']); ?></b></p>
 				<p>* We recommend restricting the Maps API Key to your server referral address. This has been detected as: <b><? echo $_SERVER['SERVER_NAME']; ?></b></p>
 				<p>* This plugin supports two short codes: [seo_booster_rocket_process_requests] &amp; [seo_booster_rocket_map].</p>
-				<p>* One you have confirmed that this plugin is configured properly you can submit the following XML sitemap to your prefered Search Engines: <a target="_blank" href="<? echo WP_PLUGIN_URL.'/SEO-Booster-Rocket/sitemap.php'; ?>">SiteMap</a></p>
+				<p>* One you have confirmed that this plugin is configured properly you can submit the following XML sitemap to your prefered Search Engines: <a target="_blank" href="<? echo plugin_dir_url(__FILE__).'/sitemap.php'; ?>">SiteMap</a></p>
 		</div>
 		<style>
 			form div th {
@@ -574,7 +574,7 @@ function menu_seo_booster_rocket() {
 				<div>
 					<div class="header_left_div"><span class="dashicons dashicons-yes"></span>This plugin was developed by <a href="https://websourcegroup.com/" target="_blank">Web Source Group</a>.<br />
 					If you like SEO Rocket Booster, please consider either <a href="https://tinyurl.com/ydaadbdy" target="_blank">Donating to the project</a> or refer <a href="https://websourcegroup.com/contact-web-source-group/request-a-free-business-consultation/" target="_blank">Web Source Group to your Business &amp; your Clients</a>!</div>
-					<div class="header_right_div"><a href="https://websourcegroup.com/" target="_blank"><img src="<? echo WP_PLUGIN_URL; ?>/SEO-Booster-Rocket/images/Web-Source-Group-Logo.png" alt="Web Source Group" /></a></div>
+					<div class="header_right_div"><a href="https://websourcegroup.com/" target="_blank"><img src="<? echo plugin_dir_url(__FILE__); ?>/images/Web-Source-Group-Logo.png" alt="Web Source Group" /></a></div>
 				</div>
 			</div>
 			<div class="header_left_div">
@@ -634,6 +634,9 @@ class SEO_Booster_Rocket_DB {
 		$this->charset = $this->db->get_charset_collate();
 		$this->geo_data_url="https://websourcegroup.com/download/seo-booster-rocket-geographic-data-backup/";
 	}
+        private function cleanVariable($var) {
+                return htmlspecialchars($this->seo_db->db->_real_escape(preg_replace('/\\\\/','',$var)));
+        }
 	public function ret_geo_table() {
 		return $this->geo_table;
 	}
