@@ -411,48 +411,47 @@ function menu_seo_booster_rocket_admin_places_maps() {
 		wp_die( __( 'You do not have sufficient permissions to access this page.' ) );		
 	}else{
 		$seo_db = new SEO_Booster_Rocket_DB();
-		//$seo_db->install_tables();
 		settings_fields( 'seo-booster-rocket-places-maps' );
 		do_settings_sections( 'seo-booster-rocket-places-maps' );
 
 		if(isset($_POST)) {
 			$msg="";
 			$success=FALSE;
-			if(isset($_POST['booster-rocket-places-api-key'])) {
+			if(isset($_POST['booster-rocket-places-api-key']) && wp_verify_nonce($_REQUEST['seo-booster-rocket-update-config'],'seo-booster-rocket-update-config')==1) {
 				update_option('booster-rocket-places-api-key',$seo_db->cleanVariable($_POST['booster-rocket-places-api-key']));
 				$msg="SEO Booster Rocket Options Saved.";
 				$success=TRUE;
 			}
-			if(isset($_POST['booster-rocket-maps-api-key'])) {
+			if(isset($_POST['booster-rocket-maps-api-key']) && wp_verify_nonce($_REQUEST['seo-booster-rocket-update-config'],'seo-booster-rocket-update-config')==1) {
 				update_option('booster-rocket-maps-api-key',$seo_db->cleanVariable($_POST['booster-rocket-maps-api-key']));
 				$msg="SEO Booster Rocket Options Saved.";
 				$success=TRUE;
 			}
-			if(isset($_POST['booster-rocket-maps-uri'])) {
+			if(isset($_POST['booster-rocket-maps-uri']) && wp_verify_nonce($_REQUEST['seo-booster-rocket-update-config'],'seo-booster-rocket-update-config')==1) {
 				update_option('booster-rocket-maps-uri',$seo_db->cleanVariable($_POST['booster-rocket-maps-uri']));
 				$msg="SEO Booster Rocket Options Saved.";
 				$success=TRUE;
 			}
-			if(isset($_POST['booster-rocket-search-term'])) {
+			if(isset($_POST['booster-rocket-search-term']) && wp_verify_nonce($_REQUEST['seo-booster-rocket-update-config'],'seo-booster-rocket-update-config')==1) {
 				update_option('booster-rocket-search-term',$seo_db->cleanVariable($_POST['booster-rocket-search-term']));
 				$msg="SEO Booster Rocket Options Saved.";
 				$success=TRUE;
 			}
-			if(isset($_POST['booster-rocket-cache-age'])) {
+			if(isset($_POST['booster-rocket-cache-age']) && wp_verify_nonce($_REQUEST['seo-booster-rocket-update-config'],'seo-booster-rocket-update-config')==1) {
 				update_option('booster-rocket-cache-age',$seo_db->cleanVariable($_POST['booster-rocket-cache-age']));
 				$msg="SEO Booster Rocket Options Saved.";
 				$success=TRUE;
 			}
-			if(isset($_POST['booster-rocket-powered-by']) && $_POST['booster-rocket-powered-by'] == 1) {
+			if(isset($_POST['booster-rocket-powered-by']) && $_POST['booster-rocket-powered-by'] == 1 && wp_verify_nonce($_REQUEST['seo-booster-rocket-update-config'],'seo-booster-rocket-update-config')==1) {
 				update_option('booster-rocket-powered-by',1);
 				$msg="SEO Booster Rocket Options Saved.";
 				$success=TRUE;
-			}elseif(isset($_POST['booster-rocket-powered-by']) && $_POST['booster-rocket-powered-by'] == 0) {
+			}elseif(isset($_POST['booster-rocket-powered-by']) && $_POST['booster-rocket-powered-by'] == 0 && wp_verify_nonce($_REQUEST['seo-booster-rocket-update-config'],'seo-booster-rocket-update-config')==1) {
 				update_option('booster-rocket-powered-by',0);
 				$msg="SEO Booster Rocket Options Saved.";
                                 $success=TRUE;
 			}
-			if(isset($_POST['seo_booster_rocket_install_tables'])) {
+			if(isset($_POST['seo_booster_rocket_install_tables']) && wp_verify_nonce($_REQUEST['seo-booster-rocket-install-tables'],'seo-booster-rocket-install-tables')==1) {
 				if(!$seo_db->are_tables_installed()) {
 					if($seo_db->install_tables()) {
 						$msg="SEO Booster Rocket Tables Installed Successfully.";
@@ -463,7 +462,7 @@ function menu_seo_booster_rocket_admin_places_maps() {
 					}
 				}
 			}
-			if(isset($_POST['seo_booster_rocket_install_geo_data'])) {
+			if(isset($_POST['seo_booster_rocket_install_geo_data']) && wp_verify_nonce($_REQUEST['seo-booster-rocket-install-geo'],'seo-booster-rocket-install-geo')==1) {
 				if(!$seo_db->is_geography_data_installed()) {
 					if($seo_db->install_geo_data()) {
 						$msg="SEO Booster Rocket GEO Data Installed Successfully.";
@@ -474,7 +473,7 @@ function menu_seo_booster_rocket_admin_places_maps() {
 					}
 				}
 			}
-			if(isset($_POST['seo_booster_rocket_clear_geography'])) {
+			if(isset($_POST['seo_booster_rocket_clear_geography']) && wp_verify_nonce($_REQUEST['seo-booster-rocket-clear-geo'],'seo-booster-rocket-clear-geo')==1) {
 				if($seo_db->clear_geography()) {
 					$msg="SEO Booster Rocket Geography Sucessfully Cleared.";
 					$success=TRUE;
@@ -483,7 +482,7 @@ function menu_seo_booster_rocket_admin_places_maps() {
 					$failed=TRUE;
 				}
 			}
-			if(isset($_POST['seo_booster_rocket_clear_cache'])) {
+			if(isset($_POST['seo_booster_rocket_clear_cache']) && wp_verify_nonce($_REQUEST['seo-booster-rocket-clear-cache'],'seo-booster-rocket-clear-cache')==1) {
 				if($seo_db->clear_geography_cache()) {
 					$msg="SEO Booster Rocket Cached Searches Sucessfully Cleared.";
 					$success=TRUE;
@@ -500,10 +499,10 @@ function menu_seo_booster_rocket_admin_places_maps() {
 			}
 		}
 		if(!$seo_db->are_tables_installed()) {
-			?><div class="notice notice-error"><p>SEO Booster Rocket Database Tables Are Not Installed! </p><form method="POST" action=""><input type="hidden" name="seo_booster_rocket_install_tables" value="1" /><input type="submit" value="Click Here to Install Tables Now" /></form></div><?
+			?><div class="notice notice-error"><p>SEO Booster Rocket Database Tables Are Not Installed! </p><form method="POST" action=""><input type="hidden" name="seo_booster_rocket_install_tables" value="1" /><?php wp_nonce_field('seo-booster-rocket-install-tables','seo-booster-rocket-install-tables'); ?><input type="submit" value="Click Here to Install Tables Now" /></form></div><?
 		}else{
 			if(!$seo_db->is_geography_data_installed()) {
-				?><div class="notice notice-error"><p>SEO Booster Rocket Geography Data Is Not Installed! </p><form method="POST" action=""><input type="hidden" name="seo_booster_rocket_install_geo_data" value="1" /><input type="submit" value="Click Here to Install Geography Data Now" /></form><p>Downloading this data reqiures a connection to the Web Source Group Server. This communication is encrypted using HTTPS technologies. Please be patient as this process may take up to a minute.</p></div><?
+				?><div class="notice notice-error"><p>SEO Booster Rocket Geography Data Is Not Installed! </p><form method="POST" action=""><input type="hidden" name="seo_booster_rocket_install_geo_data" value="1" /><?php wp_nonce_field('seo-booster-rocket-install-geo','seo-booster-rocket-install-geo'); ?><input type="submit" value="Click Here to Install Geography Data Now" /></form><p>Downloading this data reqiures a connection to the Web Source Group Server. This communication is encrypted using HTTPS technologies. Please be patient as this process may take up to a minute.</p></div><?
 			}
 		}
 		?>
@@ -537,16 +536,16 @@ function menu_seo_booster_rocket_admin_places_maps() {
 					<th scope="col">Add a Powered By Link to Support this Plugin (Is Much Appreciated):</th>
 					<td>Yes: <input type="radio" name="booster-rocket-powered-by" value="1"<?php if(get_option('booster-rocket-powered-by')==1) echo " checked"; ?> /> - No: <input type="radio" name="booster-rocket-powered-by" value="0"<?php if(get_option('booster-rocket-powered-by')==0) echo " checked"; ?> /><span class="dashicons dashicons-info" data-toggle="tooltip" title="We hope that you'll consider enabling this option. It places attribution text below your results that shows you support this plugin."></span></td>
 				</div>
-				
+				<?php wp_nonce_field('seo-booster-rocket-update-config','seo-booster-rocket-update-config'); ?>
 				<?php submit_button(); ?>
 			</form>
 				<div valign="top">
 					<th scope="col">Number of Geographic Entities:</th>
-					<td><? echo $seo_db->geography_data_count(); if($seo_db->geography_data_count() != 0) { ?> <form method="POST" action=""><input type="hidden" name="seo_booster_rocket_clear_geography" value="1" /><input type="submit" value="Clear Geography Data" /></form> <? } ?></td>
+					<td><? echo $seo_db->geography_data_count(); if($seo_db->geography_data_count() != 0) { ?> <form method="POST" action=""><input type="hidden" name="seo_booster_rocket_clear_geography" value="1" /><?php wp_nonce_field('seo-booster-rocket-clear-geo','seo-booster-rocket-clear-geo'); ?><input type="submit" value="Clear Geography Data" /></form> <? } ?></td>
 				</div><br />
 				<div valign="top">
 					<th scope="col">Number of Cached Searches:</th>
-					<td><? echo $seo_db->cached_geography_data_count(); if($seo_db->cached_geography_data_count() != 0) { ?> <form method="POST" action=""><input type="hidden" name="seo_booster_rocket_clear_cache" value="1" /><input type="submit" value="Clear Search Cache" /></form> <? } ?></td>
+					<td><? echo $seo_db->cached_geography_data_count(); if($seo_db->cached_geography_data_count() != 0) { ?> <form method="POST" action=""><input type="hidden" name="seo_booster_rocket_clear_cache" value="1" /><?php wp_nonce_field('seo-booster-rocket-clear-cache','seo-booster-rocket-clear-cache'); ?><input type="submit" value="Clear Search Cache" /></form> <? } ?></td>
 				</div>
 
 				<p>* We recommend restricting the Places API Key to your server address. This has been detected as: <b><? echo $_SERVER['SERVER_NAME']; ?></b> using the IP Address <b><? echo gethostbyname($_SERVER['SERVER_NAME']); ?></b></p>
@@ -634,8 +633,8 @@ class SEO_Booster_Rocket_DB {
 		$this->charset = $this->db->get_charset_collate();
 		$this->geo_data_url="https://websourcegroup.com/download/seo-booster-rocket-geographic-data-backup/";
 	}
-        private function cleanVariable($var) {
-                return htmlspecialchars($this->seo_db->db->_real_escape(preg_replace('/\\\\/','',$var)));
+        public function cleanVariable($var) {
+                return htmlspecialchars($this->db->_real_escape(preg_replace('/\\\\/','',$var)));
         }
 	public function ret_geo_table() {
 		return $this->geo_table;

@@ -20,7 +20,11 @@ class SEO_Booster_Rocket_Sitemap {
         function __construct() {
 		global $wpdb;
                 $this->db = $wpdb;
-                $this->geo_path = get_option('booster-rocket-maps-uri');
+		$server_scheme='http';
+		if($_SERVER['HTTPS']=='on') {
+			$server_scheme='https';
+		}
+                $this->geo_path = $server_scheme.'://'.$_SERVER['SERVER_NAME'].get_option('booster-rocket-maps-uri');
         }
         private function cleanVariable($var) {
                 return htmlspecialchars($this->db->_real_escape(preg_replace('/\\\\/','',$var)));
@@ -29,7 +33,7 @@ class SEO_Booster_Rocket_Sitemap {
                 $results = Array();
                 $result = $this->db->get_results("SELECT DISTINCT city,county,state_short FROM wsg_usa_yoga_geo ORDER BY city");
 		foreach($result as $res) {
-                        array_push($results,array('name'=>$res->city,'url'=>$_SERVER['SERVER_NAME'].$this->geo_path.$res->state_short."/".$res->county."/".$res->city));
+                        array_push($results,array('name'=>$res->city,'url'=>$this->geo_path.$res->state_short."/".$res->county."/".$res->city));
                 }
                 return $results;
         }
@@ -37,7 +41,7 @@ class SEO_Booster_Rocket_Sitemap {
                 $results = Array();
                 $result = $this->db->get_results("SELECT DISTINCT city,county,state_full FROM wsg_usa_yoga_geo ORDER BY city");
 		foreach($result as $res) {
-                        array_push($results,array('name'=>$res->city,'url'=>$_SERVER['SERVER_NAME'].$this->geo_path.$res->state_full."/".$res->county."/".$res->city));
+                        array_push($results,array('name'=>$res->city,'url'=>$this->geo_path.$res->state_full."/".$res->county."/".$res->city));
                 }
                 return $results;
         }
