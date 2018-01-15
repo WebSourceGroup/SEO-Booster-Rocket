@@ -15,6 +15,58 @@ if(!class_exists('Smarty')) {
 	include(__DIR__.'/smarty/libs/Smarty.class.php');
 }
 
+class SEO_Booster_Rocket_Sitemap {
+        private $db;
+        function __construct() {
+                global $wpdb;
+                $this->db = $wpdb;
+                $server_scheme='http';
+                if($_SERVER['HTTPS']=='on') {
+                        $server_scheme='https';
+                }
+                $this->geo_path = $server_scheme.'://'.$_SERVER['SERVER_NAME'].get_option('booster-rocket-maps-uri');
+        }
+        private function cleanVariable($var) {
+                return htmlspecialchars($this->db->_real_escape(preg_replace('/\\\\/','',$var)));
+        }
+        public function retCitiesShort() {
+                $results = Array();
+                $result = $this->db->get_results("SELECT DISTINCT city,county,state_short FROM wsg_usa_yoga_geo ORDER BY city");
+                foreach($result as $res) {
+                        array_push($results,array('name'=>$res->city,'url'=>$this->geo_path.$res->state_short."/".$res->county."/".$res->city));
+                }
+                return $results;
+        }
+        public function retCities() {
+                $results = Array();
+                $result = $this->db->get_results("SELECT DISTINCT city,county,state_full FROM wsg_usa_yoga_geo ORDER BY city");
+                foreach($result as $res) {
+                        array_push($results,array('name'=>$res->city,'url'=>$this->geo_path.$res->state_full."/".$res->county."/".$res->city));
+                }
+                return $results;
+        }
+        public function retSiteMap() {
+                $retval='<?xml version="1.0" encoding="UTF-8"'."?".'><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+
+                foreach($this->retCities() as $city) {
+                        $retval.='<url><loc>'.$city['url'].'</loc><changefreq>weekly</changefreq><priority>0.69</priority></url>'."\n";
+                }
+                foreach($this->retCitiesShort() as $city) {
+                        $retval.='<url><loc>'.$city['url'].'</loc><changefreq>weekly</changefreq><priority>0.69</priority></url>'."\n";
+                }
+                $retval.='</urlset>';
+                return $retval;
+        }
+}
+function display_rocket_booster_sitemap() {
+	if(isset($_GET['seo-booster-rocket-sitemap'])) {
+		$sitemap = new SEO_Booster_Rocket_Sitemap;
+		header("Content-type: text/xml");
+		print $sitemap->retSiteMap();
+		exit;
+	}
+}
+add_action( 'init', 'display_rocket_booster_sitemap' );
 
 class SEO_Booster_Rocket_HTMLify {
 	private $url_path;
@@ -517,7 +569,7 @@ function menu_seo_booster_rocket_admin_places_maps() {
 				</div>
 				<div valign="top">
 					<th scope="col">Google Maps API Key:</th>
-					<td><input type="text" name="booster-rocket-maps-api-key" size="100" placeholder="<? echo str_repeat("X",39); ?>" value="<?php echo esc_attr( get_option('booster-rocket-maps-api-key' ) ); ?>" /> <a target="_blank" href="https://websourcegroup.com/how-to-get-a-google-places-api-key/">How do I get a Maps API Key?</a>
+					<td><input type="text" name="booster-rocket-maps-api-key" size="100" placeholder="<? echo str_repeat("X",39); ?>" value="<?php echo esc_attr( get_option('booster-rocket-maps-api-key' ) ); ?>" /> <a target="_blank" href="https://websourcegroup.com/how-to-get-a-google-maps-api-key/">How do I get a Maps API Key?</a>
 					</td>
 				</div>
 				<div valign="top">
@@ -551,7 +603,7 @@ function menu_seo_booster_rocket_admin_places_maps() {
 				<p>* We recommend restricting the Places API Key to your server address. This has been detected as: <b><? echo $_SERVER['SERVER_NAME']; ?></b> using the IP Address <b><? echo gethostbyname($_SERVER['SERVER_NAME']); ?></b></p>
 				<p>* We recommend restricting the Maps API Key to your server referral address. This has been detected as: <b><? echo $_SERVER['SERVER_NAME']; ?></b></p>
 				<p>* This plugin supports two short codes: [seo_booster_rocket_process_requests] &amp; [seo_booster_rocket_map].</p>
-				<p>* One you have confirmed that this plugin is configured properly you can submit the following XML sitemap to your prefered Search Engines: <a target="_blank" href="<? echo plugin_dir_url(__FILE__).'/sitemap.php'; ?>">SiteMap</a></p>
+				<p>* One you have confirmed that this plugin is configured properly you can submit the following XML sitemap to your prefered Search Engines: <a target="_blank" href="<? echo home_url(); ?>?seo-booster-rocket-sitemap">SiteMap</a></p>
 		</div>
 		<style>
 			form div th {
