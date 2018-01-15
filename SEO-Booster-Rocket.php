@@ -27,7 +27,7 @@ class SEO_Booster_Rocket_Sitemap {
                 $this->geo_path = $server_scheme.'://'.$_SERVER['SERVER_NAME'].get_option('booster-rocket-maps-uri');
         }
         private function cleanVariable($var) {
-                return htmlspecialchars($this->db->_real_escape(preg_replace('/\\\\/','',$var)));
+		return sanitize_text_field($var);
         }
         public function retCitiesShort() {
                 $results = Array();
@@ -101,7 +101,7 @@ class SEO_Booster_Rocket_Geography {
 		$this->seo_db = new SEO_Booster_Rocket_DB();
 	}
         private function cleanVariable($var) {
-                return htmlspecialchars($this->seo_db->db->_real_escape(preg_replace('/\\\\/','',$var)));
+		return sanitize_text_field($var);
         }
 	public function retStateShortName($state_long) {
 		$state_long = $this->cleanVariable($state_long);
@@ -314,7 +314,7 @@ class SEO_Booster_Rocket_Places {
 		return count($this->location_types);
 	}
         private function cleanVariable($var) {
-                return htmlspecialchars($this->seo_db->db->_real_escape(preg_replace('/\\\\/','',$var)));
+		return sanitize_text_field($var);
         }
 
 	private function retSearchCache($state,$city) {
@@ -686,7 +686,7 @@ class SEO_Booster_Rocket_DB {
 		$this->geo_data_url="https://websourcegroup.com/download/seo-booster-rocket-geographic-data-backup/";
 	}
         public function cleanVariable($var) {
-                return htmlspecialchars($this->db->_real_escape(preg_replace('/\\\\/','',$var)));
+		return sanitize_text_field($var);
         }
 	public function ret_geo_table() {
 		return $this->geo_table;

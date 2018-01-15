@@ -20,7 +20,7 @@
 	<tr>
 		<th>Name</th>
 		<th>Address</th>
-		<th>Open?</th>
+		<th>Open Now?</th>
 		<th>Rating</th>
 		<th>Photos/Contact Names?</th>
 	</tr>
