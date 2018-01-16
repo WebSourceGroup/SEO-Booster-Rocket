@@ -683,6 +683,7 @@ class SEO_Booster_Rocket_DB {
 		$this->geo_table = $this->db->prefix."seo_booster_rocket_geo";
 		$this->cache_table = $this->db->prefix."seo_booster_rocket_cache";
 		$this->charset = $this->db->get_charset_collate();
+		//$this->geo_data_url="https://raw.githubusercontent.com/WebSourceGroup/US_State_County_Town/master/SEO_Booster_Rocket_20180111.sql.dat";
 		$this->geo_data_url="https://websourcegroup.com/download/seo-booster-rocket-geographic-data-backup/";
 	}
         public function cleanVariable($var) {
