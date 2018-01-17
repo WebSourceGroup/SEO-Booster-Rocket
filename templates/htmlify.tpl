@@ -1,5 +1,5 @@
 <br />
-<h3 style="text-align: center;">Search for Yoga Studios by {$title}</h3>
+<h3 style="text-align: center;">Search for {$search_term} by {$title}</h3>
 <div class="div_table">
 {foreach from=$results item=result name=result_list}
 	{if $smarty.foreach.result_list.index % $mod == 0}
