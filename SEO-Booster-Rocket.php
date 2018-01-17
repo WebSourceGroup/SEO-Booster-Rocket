@@ -75,6 +75,7 @@ class SEO_Booster_Rocket_HTMLify {
 		$this->url_path = '';
 		$this->smarty = new Smarty();
 		$this->smarty->setTemplateDir(__DIR__.'/templates/');
+		$this->smarty->setCompileDir(__DIR__.'/templates_c');
 	}
 	public function process($title,$results,$cells_per_row = 4) {
 		if(is_array($results)) {
@@ -300,6 +301,7 @@ class SEO_Booster_Rocket_Places {
 		$this->seo_db = new SEO_Booster_Rocket_DB();
 		$this->smarty = new Smarty();
 		$this->smarty->setTemplateDir(__DIR__.'/templates/');
+		$this->smarty->setCompileDir(__DIR__.'/templates_c');
 		$this->town = $town;
 		$this->state = $state;
 		$this->places_api_key = get_option('booster-rocket-places-api-key');
