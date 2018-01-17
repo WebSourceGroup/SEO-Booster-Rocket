@@ -82,7 +82,10 @@ class SEO_Booster_Rocket_HTMLify {
 			$this->smarty->assign('mod',intval($cells_per_row));
 			$this->smarty->assign('results',array_filter($results));
 		        if(get_option('booster-rocket-powered-by')==1) {
-				$this->smarty->assign('powered_by','Powered by <a href="https://websourcegroup.com/" target="_blank">SEO Booster Rocket</a>, developed by <a href="https://websourcegroup.com/" target="_blank"><img src="'.plugin_dir_url(__FILE__).'/images/Web-Source-Group-Logo.png" alt="Web Source Group - We Build Businesses with Technology" /></a>');
+				$this->smarty->assign('powered_by','Powered by <a href="https://wordpress.org/plugins/seo-booster-rocket/" target="_blank">SEO Booster Rocket</a>, developed by <a href="https://websourcegroup.com/" target="_blank"><img src="'.plugin_dir_url(__FILE__).'/images/Web-Source-Group-Logo.png" alt="Web Source Group - We Build Businesses with Technology" /></a>');
+			}
+			if(get_option('booster-rocket-search-term')) {
+				$this->smarty->assign('search_term',get_option('booster-rocket-search-term'));
 			}
 			return $this->smarty->fetch(__DIR__.'/templates/htmlify.tpl');
 		}
@@ -357,11 +360,11 @@ class SEO_Booster_Rocket_Places {
 			if(strlen($this->state) > 2) {
 				$this->state = ret_seo_long_state_to_short($this->state);
 			}
-			$query="query=yoga+near+".str_replace(" ","+",$this->town).",+".$this->state; //UPDATE
-			if(strlen($next_page) > 0) {
-				$query.="&pagetoken=$next_page";
-			}
-			//print "\tNow Fetching:  $this->base_url$query<br /><br />";
+			$query="query=".urlencode(esc_attr( get_option('booster-rocket-search-term')))."+near+".str_replace(" ","+",$this->town).",+".$this->state; //UPDATE
+			//if(strlen($next_page) > 0) {
+			//	$query.="&pagetoken=$next_page";
+			//}
+			print "\tNow Fetching:  $this->base_url$query<br /><br />";
 			$res = $this->retSearchCache($this->state,$this->town);
 			if($res == FALSE) {
 				$res = file_get_contents($this->base_url.str_replace('&amp;','&',$query));
@@ -431,13 +434,13 @@ function seo_booster_rocket_map( $atts ) {
 	if(isset($_GET['state']) && strlen($_GET['state']) > 0) { $state = htmlentities($_GET['state']); }
 
 	if(get_option('booster-rocket-powered-by')==1) {
-		$places->smarty->assign('powered_by','Powered by <a href="https://websourcegroup.com/" target="_blank">SEO Booster Rocket</a>, developed by <a href="https://websourcegroup.com/" target="_blank"><img src="'.plugin_dir_url(__FILE__).'/images/Web-Source-Group-Logo.png" alt="Web Source Group - We Build Businesses with Technology" /></a>');
+		$places->smarty->assign('powered_by','Powered by <a href="https://wordpress.org/plugins/seo-booster-rocket/" target="_blank">SEO Booster Rocket</a>, developed by <a href="https://websourcegroup.com/" target="_blank"><img src="'.plugin_dir_url(__FILE__).'/images/Web-Source-Group-Logo.png" alt="Web Source Group - We Build Businesses with Technology" /></a>');
 	}
 
 	if(strlen($town) > 0 && strlen($state) > 0) {
 		$places = new SEO_Booster_Rocket_Places($town,$state);
 		if(get_option('booster-rocket-powered-by')==1) {
-			$places->smarty->assign('powered_by','Powered by <a href="https://websourcegroup.com/" target="_blank">SEO Booster Rocket</a>, developed by <a href="https://websourcegroup.com/" target="_blank"><img src="'.plugin_dir_url(__FILE__).'/images/Web-Source-Group-Logo.png" alt="Web Source Group - We Build Businesses with Technology" /></a>');
+			$places->smarty->assign('powered_by','Powered by <a href="https://wordpress.org/plugins/seo-booster-rocket/" target="_blank">SEO Booster Rocket</a>, developed by <a href="https://websourcegroup.com/" target="_blank"><img src="'.plugin_dir_url(__FILE__).'/images/Web-Source-Group-Logo.png" alt="Web Source Group - We Build Businesses with Technology" /></a>');
 		}
 		$places->smarty->assign("search_term",htmlspecialchars($town).", ".htmlspecialchars($state));
 
@@ -446,6 +449,9 @@ function seo_booster_rocket_map( $atts ) {
 		$places->smarty->assign('results',$places->fetch_json());
 		$places->smarty->assign('request_count',$places->ret_request_count());
 		$places->smarty->assign('geolocation',$places->ret_town_geo());
+		if(get_option('booster-rocket-search-term')) {
+			$places->smarty->assign('search_term',get_option('booster-rocket-search-term'));
+		}
 		if(isset($atts['results']) && $atts['results'] == "false") {
 			$retval.=$places->smarty->fetch(__DIR__.'/templates/search.tpl');
 		}else{
@@ -453,6 +459,9 @@ function seo_booster_rocket_map( $atts ) {
 			$retval.=$places->smarty->fetch(__DIR__."/templates/results.tpl");
 		}
 	}else{
+		if(get_option('booster-rocket-search-term')) {
+			$places->smarty->assign('search_term',get_option('booster-rocket-search-term'));
+		}
 		$places->smarty->display(__DIR__.'/templates/search.tpl');
 	}
 	return $retval;
@@ -683,7 +692,6 @@ class SEO_Booster_Rocket_DB {
 		$this->geo_table = $this->db->prefix."seo_booster_rocket_geo";
 		$this->cache_table = $this->db->prefix."seo_booster_rocket_cache";
 		$this->charset = $this->db->get_charset_collate();
-		//$this->geo_data_url="https://raw.githubusercontent.com/WebSourceGroup/US_State_County_Town/master/SEO_Booster_Rocket_20180111.sql.dat";
 		$this->geo_data_url="https://websourcegroup.com/download/seo-booster-rocket-geographic-data-backup/";
 	}
         public function cleanVariable($var) {
