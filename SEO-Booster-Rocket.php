@@ -364,7 +364,7 @@ class SEO_Booster_Rocket_Places {
 			//if(strlen($next_page) > 0) {
 			//	$query.="&pagetoken=$next_page";
 			//}
-			print "\tNow Fetching:  $this->base_url$query<br /><br />";
+			//print "\tNow Fetching:  $this->base_url$query<br /><br />";
 			$res = $this->retSearchCache($this->state,$this->town);
 			if($res == FALSE) {
 				$res = file_get_contents($this->base_url.str_replace('&amp;','&',$query));
