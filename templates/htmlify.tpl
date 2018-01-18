@@ -10,7 +10,6 @@
 	<div class="div_row">
 	{/if}
 			<div class="div_cell"><a href="{$result['url']|escape:" ":"+"}">{$result['name']}</a></div>
-        <?php }?>
 	{if $smarty.foreach.result_list.last}
                 </div>
 	{/if}

@@ -280,14 +280,58 @@ function ret_seo_long_state_to_short($state) {
 	return $geo->retStateShortName($state);
 }
 
+add_filter('query_vars', 'register_query_vars');
+function register_query_vars($public_query_vars) {
+	$public_query_vars[] = "state";
+	$public_query_vars[] = "county";
+	$public_query_vars[] = "city";
+	return $public_query_vars;
+}
+
+add_action('init','seo_booster_rocket_rewrite_rule');
+function seo_booster_rocket_rewrite_rule() {
+	if($_SERVER['REQUEST_URI'] != esc_attr(get_option('booster-rocket-maps-uri'))) { return false; }
+	global $wp_rewrite;
+	$wp_rewrite->flush_rules( false );
+
+	$post_id=url_to_postid(esc_attr(get_option('booster-rocket-maps-uri')));
+	$post_page='index.php?page_id='.intval($post_id);
+
+	add_rewrite_tag('%state%','([^&]+)');
+	add_rewrite_tag('%county%','([^&]+)');
+	add_rewrite_tag('%city%','([^&]+)');
+
+	//STATE
+		$state_match=ltrim(esc_attr(get_option('booster-rocket-maps-uri')),'/').'([A-Za-z\ \+]+)/?$';
+		$state_target=$post_page.'&state=$matches[1]';
+		add_rewrite_rule($state_match,$state_target,'top');
+
+	//COUNTY
+		$county_match=ltrim(esc_attr(get_option('booster-rocket-maps-uri')),'/').'([A-Za-z\ \+]+)/([A-Za-z\ \+]+)/?$';
+		$county_target=$post_page.'&state=$matches[1]&county=$matches[2]';
+		add_rewrite_rule($county_match,$county_target,'top');
+
+
+	//CITY
+		$city_match=ltrim(esc_attr(get_option('booster-rocket-maps-uri')),'/').'([A-Za-z\ \+]+)/([A-Za-z\ \+]+)/([A-Za-z\ \+]+)/?$';
+		$city_target=$post_page.'&state=$matches[1]&county=$matches[2]&city=$matches[3]';
+		add_rewrite_rule($city_match,$city_target,'top');
+
+	//print $state_match.' '.$state_target."<br />";
+	//print $county_match.' '.$county_target."<br />";
+	//print $city_match.' '.$city_target."<br />";
+	#print "AAAAAAA";
+}
+
 add_shortcode('seo_booster_rocket_process_requests','seo_booster_rocket_process_requests');
 function seo_booster_rocket_process_requests() {
-	if(isset($_GET['city']) && isset($_GET['county']) && isset($_GET['state'])) {
+	global $wp_query;
+	if(isset($wp_query->query_vars['city']) && isset($wp_query->query_vars['county']) && isset($wp_query->query_vars['state'])) {
 		return seo_booster_rocket_map(array());
-	}elseif(isset($_GET['county']) && isset($_GET['state'])) {
-		return ret_seo_cities(array('state'=>htmlspecialchars($_GET['state']),'county'=>htmlspecialchars($_GET['county'])));
-	}elseif(isset($_GET['state'])) {
-		return ret_seo_counties(array('state'=>htmlspecialchars($_GET['state'])));
+	}elseif(isset($wp_query->query_vars['county']) && isset($wp_query->query_vars['state'])) {
+		return ret_seo_cities(array('state'=>htmlspecialchars($wp_query->query_vars['state']),'county'=>htmlspecialchars($wp_query->query_vars['county'])));
+	}elseif(isset($wp_query->query_vars['state'])) {
+		return ret_seo_counties(array('state'=>htmlspecialchars($wp_query->query_vars['state'])));
 	}else{
 		return ret_seo_state(array('full'=>"true")).ret_seo_state(array());
 	}
@@ -417,14 +461,9 @@ class SEO_Booster_Rocket_Places {
 }
 
 
-
-
-
-
-
-
 add_shortcode('seo_booster_rocket_map','seo_booster_rocket_map');
 function seo_booster_rocket_map( $atts ) {
+	global $wp_query;
 	$places = new SEO_Booster_Rocket_Places();
 	$retval=$places->smarty->fetch(__DIR__.'/templates/css.tpl');
 
@@ -434,6 +473,10 @@ function seo_booster_rocket_map( $atts ) {
 	if(isset($_GET['town']) && strlen($_GET['town']) > 0) { $town = htmlentities($_GET['town']); }
 	if(isset($_GET['city']) && strlen($_GET['city']) > 0) { $town = htmlentities($_GET['city']); }
 	if(isset($_GET['state']) && strlen($_GET['state']) > 0) { $state = htmlentities($_GET['state']); }
+
+	if(isset($wp_query->query_vars['town']) && strlen($wp_query->query_vars['town']) > 0) { $town = htmlentities($wp_query->query_vars['town']); }
+	if(isset($wp_query->query_vars['city']) && strlen($wp_query->query_vars['city']) > 0) { $town = htmlentities($wp_query->query_vars['city']); }
+	if(isset($wp_query->query_vars['state']) && strlen($wp_query->query_vars['state']) > 0) { $state = htmlentities($wp_query->query_vars['state']); }
 
 	if(get_option('booster-rocket-powered-by')==1) {
 		$places->smarty->assign('powered_by','Powered by <a href="https://wordpress.org/plugins/seo-booster-rocket/" target="_blank">SEO Booster Rocket</a>, developed by <a href="https://websourcegroup.com/" target="_blank"><img src="'.plugin_dir_url(__FILE__).'/images/Web-Source-Group-Logo.png" alt="Web Source Group - We Build Businesses with Technology" /></a>');
@@ -642,7 +685,7 @@ function menu_seo_booster_rocket() {
 			<div class="header_left_div">
 				<p>This plugin was developed with the sole purpose of increasing the indexable footprint of your Wordpress Website. This plugin can rapidly transform a 5 page web site into a 50,000+ page website in minutes!</p>
 				<p>The data that is used by this plugin only supports US Based States, Counties &amp; Towns. If you have access to i18n geographic data then please <a href="https://websourcegroup.com/contact-web-source-group/" target="_blank">contact us to determine integration strategies</a>.</p>
-				<p>A demo is available for viewing <a href="https://usayo.ga/search-for-a-yoga-studio/" target="_blank">Here</a> and <a href="https://usayo.ga/find-yoga-studio-by-geography/" target="_blank">Here</a>.</p>
+				<p>A demo is available for viewing <a href="https://usayo.ga/search-for-a-yoga-studio/" target="_blank">Here</a> and <a href="https://usayo.ga'.esc_attr(get_option('booster-rocket-maps-uri')).'" target="_blank">Here</a>.</p>
 				<h3>Configure this Plugin</h3>
 				<h5><a href="admin.php?page=seo-booster-rocket-places-maps">Places & Maps</a></h5>
 				<br />
