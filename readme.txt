@@ -23,13 +23,22 @@ This plugin has only been test with Wordpress version 4.9.1 but is highly likely
 Please be aware that we're interested in your feedback so we can deliver you the best, and most useful, plugin possible.
 
 == Installation ==
-Installation Instructions:
 
+= Traditional Option =
+
+Installation Instructions:
 1) Download the plugin and unzip it.
 2) Put the ‘search-everything’ directory into your wp-content/plugins/ directory.
 3) Go to the Plugins page in your WordPress Administration area and click ‘Activate’ next to Search Everything.
 4) Go to the Settings > Search Everything and configure it.
 5) That’s it. Enjoy searching.
+
+= Smoother Option =
+1) Click Install
+2) Click Active
+
+= Either Way =
+You'll also be required to install both a <a href="https://websourcegroup.com/how-to-get-a-google-places-api-key/" target="blank">Google Places API Key</> & a <a href="https://websourcegroup.com/how-to-get-a-google-maps-api-key/" target="blank">Google Maps Javascript API Key</a>. You'll also need to hard code a page URI that is used to the Wordpress Rewrite API.
 
 == Changelog ==
 v: 1.0: Initial Release. Please note that this plugin is currently in its initial Stable Build.
@@ -38,13 +47,14 @@ v: 1.0.2: Updated url rewrite functionality & misc UX/UI updates.
 
 
 == Upgrade Notice ==
-### 1.0 ###
+
+= 1.0 =
 Inital realease. This version has some bugs which were updated in future version.
 
-### 1.0.1 ###
+= 1.0.1 =
 Tested some bug updates which were incomplete at this phase.
 
-### 1.0.2 ###
+= 1.0.2 =
 Added functionality that uses the WP Rewrite API. Please use at your own discretion.
 
 == Screenshots ==
