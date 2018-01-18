@@ -18,7 +18,7 @@ This plugin uses the Google Places API & the Google Maps API and combines it wit
 
 For a live example of this plugin please visit: <a href="https://usayo.ga/find-yoga-studio-by-geography/" target="_blank">USA Yoga</a>
 
-This plugin has only been test with Wordpress version 4.9.1 but is highly likely to work find with much earlier versions.
+This plugin has only been test with Wordpress version 4.9.1 but is highly likely to work fine with much earlier versions.
 
 Please be aware that we're interested in your feedback so we can deliver you the best, and most useful, plugin possible.
 
