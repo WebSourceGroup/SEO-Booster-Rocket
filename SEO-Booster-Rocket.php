@@ -31,7 +31,7 @@ class SEO_Booster_Rocket_Sitemap {
         }
         public function retCitiesShort() {
                 $results = Array();
-                $result = $this->db->get_results("SELECT DISTINCT city,county,state_short FROM wsg_usa_yoga_geo ORDER BY city");
+                $result = $this->db->get_results("SELECT DISTINCT city,county,state_short FROM wsg_seo_booster_rocket_geo ORDER BY city");
                 foreach($result as $res) {
                         array_push($results,array('name'=>$res->city,'url'=>$this->geo_path.$res->state_short."/".$res->county."/".$res->city));
                 }
@@ -39,7 +39,7 @@ class SEO_Booster_Rocket_Sitemap {
         }
         public function retCities() {
                 $results = Array();
-                $result = $this->db->get_results("SELECT DISTINCT city,county,state_full FROM wsg_usa_yoga_geo ORDER BY city");
+                $result = $this->db->get_results("SELECT DISTINCT city,county,state_full FROM wsg_seo_booster_rocket_geo ORDER BY city");
                 foreach($result as $res) {
                         array_push($results,array('name'=>$res->city,'url'=>$this->geo_path.$res->state_full."/".$res->county."/".$res->city));
                 }

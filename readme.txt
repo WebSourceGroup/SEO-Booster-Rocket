@@ -9,7 +9,9 @@ Stable tag: 1.0.2
 License: GPLv2 or later.
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-The SEO Booster Rocket is used to increase your Wordpress Websites SEO Footprint. It currently uses Google Places & Maps API to create over 50,000 additional unique indexable URL\'s. These URL's are created by picking a search term (ex: Convenience Stores) and allows a user/search engine the ability to navigate to results by State, County & City. This system only supports US Geographies at this time. By using this software you agree that you are using this software at your Own Risk and that this software provides no guarantees. This plugin supports two short codes: [seo_booster_rocket_process_requests] &amp; [seo_booster_rocket_map]
+The SEO Booster Rocket is used to increase your Wordpress Websites SEO Footprint. It currently uses Google Places & Maps API to create over 50,000 additional unique indexable URL\'s. These URL's are created by picking a search term (ex: Convenience Stores) and allows a user/search engine the ability to navigate to results by State, County & City. Currently, this system only supports US Geographies at this time. By using this software you agree that you are using this software at your Own Risk and that this software provides no guarantees.
+
+This plugin supports two short codes: [seo_booster_rocket_process_requests] &amp; [seo_booster_rocket_map]
 
 == Description ==
 Do you need to provide additional URL's to search engines like Google or Bing? Does your website have less than 20 pages but you'd wish to have 50,000? Is your website's content themed to include searchable Google Map Business Listings for every US State, County, and City? If you've answered yes to any of these questions then this SEO Boster Rocket might putt your website into orbit.
@@ -22,14 +24,26 @@ This plugin has only been test with Wordpress version 4.9.1 but is highly likely
 
 Please be aware that we're interested in your feedback so we can deliver you the best, and most useful, plugin possible.
 
+== Screenshots ==
+
 == Installation ==
 Installation Instructions:
+
+### Traditional Option ### 
 
 1) Download the plugin and unzip it.
 2) Put the ‘search-everything’ directory into your wp-content/plugins/ directory.
 3) Go to the Plugins page in your WordPress Administration area and click ‘Activate’ next to Search Everything.
 4) Go to the Settings > Search Everything and configure it.
 5) That’s it. Enjoy searching.
+
+### Smoother Option ###
+1) Click Install
+2) Click Active
+
+### Either Way ###
+
+You'll also be required to install both a <a href="https://websourcegroup.com/how-to-get-a-google-places-api-key/" target="blank">Google Places API Key</> & a <a href="https://websourcegroup.com/how-to-get-a-google-maps-api-key/" target="blank">Google Maps Javascript API Key</a>. You'll also need to hard code a page URI that is used to the Wordpress Rewrite API.
 
 == Changelog ==
 v: 1.0: Initial Release. Please note that this plugin is currently in its initial Stable Build.
