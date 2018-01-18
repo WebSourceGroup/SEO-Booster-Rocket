@@ -48,18 +48,18 @@ v: 1.0.2: Updated url rewrite functionality & misc UX/UI updates.
 
 == Upgrade Notice ==
 
-= 1.0 =
-Inital realease. This version has some bugs which were updated in future version.
+= 1.0.2 =
+Added functionality that uses the WP Rewrite API. Please use at your own discretion.
 
 = 1.0.1 =
 Tested some bug updates which were incomplete at this phase.
 
-= 1.0.2 =
-Added functionality that uses the WP Rewrite API. Please use at your own discretion.
+= 1.0 =
+Inital realease. This version has some bugs which were updated in future version.
 
 == Screenshots ==
- 
-1. To provide traditional Geographic Searched for your specific topic, this example is for Yoga Studios, simply use the [seo_booster_rocket_map] plugin. This is great functionality to provide your visitors if your website tailors to a specific topic of interest.
+
+1. Its easy to provide traditional Geographic Searches for your websites specific topic. Simply use the [seo_booster_rocket_map] shortcode. This is great functionality to provide your visitors if your website tailors to a specific topic of interest.
 
 2. For the full SEO Booster Rocket experience you can list every US state & territory by using their full name. Each of these links are clickable and lead into the individual states/territory’s counties. Simply place the [seo_booster_rocket_process_requests] shortcode on your registered URI page.
 
@@ -73,7 +73,7 @@ Added functionality that uses the WP Rewrite API. Please use at your own discret
 
 7. Additionally, the search results page also contains a basic table that contains actionable information so that your visitors/customers can make an educated decision.
 
-8. The Administration page for the SEO Booster Rocket has a few options including requiring a Google Place & Google Maps API Key, a hard coded URI for a page containing the page that uses the SEO Booster Rocket shortcode, search cache age & an option to Show Support for the SEO Booster Rocket.
+8. The Administration page has a location for a Google Place & Google Maps API Key, a hard coded URI for a page containing the page that uses the SEO Booster Rocket shortcode, search cache age & an option to Show Support for the SEO Booster Rocket.
 
 9. Just after activating the SEO Booster Rocket you’ll have to create the required database tables.
 
