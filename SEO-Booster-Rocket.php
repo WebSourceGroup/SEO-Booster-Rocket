@@ -31,7 +31,7 @@ class SEO_Booster_Rocket_Sitemap {
         }
         public function retCitiesShort() {
                 $results = Array();
-                $result = $this->db->get_results("SELECT DISTINCT city,county,state_short FROM wsg_usa_yoga_geo ORDER BY city");
+                $result = $this->db->get_results("SELECT DISTINCT city,county,state_short FROM wsg_seo_booster_rocket_geo ORDER BY city");
                 foreach($result as $res) {
                         array_push($results,array('name'=>$res->city,'url'=>$this->geo_path.$res->state_short."/".$res->county."/".$res->city));
                 }
@@ -39,7 +39,7 @@ class SEO_Booster_Rocket_Sitemap {
         }
         public function retCities() {
                 $results = Array();
-                $result = $this->db->get_results("SELECT DISTINCT city,county,state_full FROM wsg_usa_yoga_geo ORDER BY city");
+                $result = $this->db->get_results("SELECT DISTINCT city,county,state_full FROM wsg_seo_booster_rocket_geo ORDER BY city");
                 foreach($result as $res) {
                         array_push($results,array('name'=>$res->city,'url'=>$this->geo_path.$res->state_full."/".$res->county."/".$res->city));
                 }
@@ -83,7 +83,7 @@ class SEO_Booster_Rocket_HTMLify {
 			$this->smarty->assign('mod',intval($cells_per_row));
 			$this->smarty->assign('results',array_filter($results));
 		        if(get_option('booster-rocket-powered-by')==1) {
-				$this->smarty->assign('powered_by','Powered by <a href="https://wordpress.org/plugins/seo-booster-rocket/" target="_blank">SEO Booster Rocket</a>, developed by <a href="https://websourcegroup.com/" target="_blank"><img src="'.plugin_dir_url(__FILE__).'/images/Web-Source-Group-Logo.png" alt="Web Source Group - We Build Businesses with Technology" /></a>');
+				$this->smarty->assign('powered_by','Powered by <a href="https://wordpress.org/plugins/seo-booster-rocket/" target="_blank">SEO Booster Rocket</a>, developed by <a href="https://websourcegroup.com/" target="_blank"><img src="'.plugin_dir_url(__FILE__).'/images/Web-Source-Group-Logo.png" alt="Web Source Group - We Build Businesses with Technology" /></a><br />');
 			}
 			if(get_option('booster-rocket-search-term')) {
 				$this->smarty->assign('search_term',get_option('booster-rocket-search-term'));
@@ -479,13 +479,13 @@ function seo_booster_rocket_map( $atts ) {
 	if(isset($wp_query->query_vars['state']) && strlen($wp_query->query_vars['state']) > 0) { $state = htmlentities($wp_query->query_vars['state']); }
 
 	if(get_option('booster-rocket-powered-by')==1) {
-		$places->smarty->assign('powered_by','Powered by <a href="https://wordpress.org/plugins/seo-booster-rocket/" target="_blank">SEO Booster Rocket</a>, developed by <a href="https://websourcegroup.com/" target="_blank"><img src="'.plugin_dir_url(__FILE__).'/images/Web-Source-Group-Logo.png" alt="Web Source Group - We Build Businesses with Technology" /></a>');
+		$places->smarty->assign('powered_by','Powered by <a href="https://wordpress.org/plugins/seo-booster-rocket/" target="_blank">SEO Booster Rocket</a>, developed by <a href="https://websourcegroup.com/" target="_blank"><img src="'.plugin_dir_url(__FILE__).'/images/Web-Source-Group-Logo.png" alt="Web Source Group - We Build Businesses with Technology" /></a><br />');
 	}
 
 	if(strlen($town) > 0 && strlen($state) > 0) {
 		$places = new SEO_Booster_Rocket_Places($town,$state);
 		if(get_option('booster-rocket-powered-by')==1) {
-			$places->smarty->assign('powered_by','Powered by <a href="https://wordpress.org/plugins/seo-booster-rocket/" target="_blank">SEO Booster Rocket</a>, developed by <a href="https://websourcegroup.com/" target="_blank"><img src="'.plugin_dir_url(__FILE__).'/images/Web-Source-Group-Logo.png" alt="Web Source Group - We Build Businesses with Technology" /></a>');
+			$places->smarty->assign('powered_by','Powered by <a href="https://wordpress.org/plugins/seo-booster-rocket/" target="_blank">SEO Booster Rocket</a>, developed by <a href="https://websourcegroup.com/" target="_blank"><img src="'.plugin_dir_url(__FILE__).'/images/Web-Source-Group-Logo.png" alt="Web Source Group - We Build Businesses with Technology" /></a><br />');
 		}
 		$places->smarty->assign("search_term",htmlspecialchars($town).", ".htmlspecialchars($state));
 

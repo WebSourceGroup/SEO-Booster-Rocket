@@ -46,3 +46,27 @@ Tested some bug updates which were incomplete at this phase.
 
 ### 1.0.2 ###
 Added functionality that uses the WP Rewrite API. Please use at your own discretion.
+
+== Screenshots ==
+ 
+1. To provide traditional Geographic Searched for your specific topic, this example is for Yoga Studios, simply use the [seo_booster_rocket_map] plugin. This is great functionality to provide your visitors if your website tailors to a specific topic of interest.
+
+2. For the full SEO Booster Rocket experience you can list every US state & territory by using their full name. Each of these links are clickable and lead into the individual states/territory’s counties. Simply place the [seo_booster_rocket_process_requests] shortcode on your registered URI page.
+
+3. The [seo_booster_rocket_process_requests] shortcode also displays every state/territory using their respective short name. Each of these links are clickable and lead into the individual states/territory’s counties.
+
+4. Once you click a State, or Territory, you’ll then be sent to another listing containing Every County within the geography you selected. In this example, we’ve selected New York.
+
+5. Once you click a County you’ll then be sent to another listing containing Every City within the geography you selected. In this example, we’ve selected Albany County in New York State.
+
+6. Once you click on a specific City/Town you’ll then be sent to a search results page that contains a filled out search form, a map with results for your selected topic.
+
+7. Additionally, the search results page also contains a basic table that contains actionable information so that your visitors/customers can make an educated decision.
+
+8. The Administration page for the SEO Booster Rocket has a few options including requiring a Google Place & Google Maps API Key, a hard coded URI for a page containing the page that uses the SEO Booster Rocket shortcode, search cache age & an option to Show Support for the SEO Booster Rocket.
+
+9. Just after activating the SEO Booster Rocket you’ll have to create the required database tables.
+
+10. Once the tables are installed you’ll then have to install the Geographic data. This data is downloaded over an encrypted channel from our servers. (don’t forget to provide a positive review!)
+
+11. Once the Geographic database is installed you’ll then see that, at the time of this writing, contains 63,207 unique geographic records that your site will now be able to use! (Don’t forget to submit the SEO Booster Rocket Site Map to your preferred search engines!)
