@@ -5,7 +5,7 @@ Donate link: https://tinyurl.com/ydaadbdy
 Requires at least: 4.9.1
 Tested up to: 4.9.1
 Requires PHP: 5.6.32
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later.
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -34,3 +34,15 @@ Installation Instructions:
 == Changelog ==
 v: 1.0: Initial Release. Please note that this plugin is currently in its initial Stable Build.
 v: 1.0.1: Initial Updates regarding known issues with the initial code base of the wordpress plugin. These including updates to form templates, properly representing search terms & more. More updates are expected within the very near term.
+v: 1.0.2: Updated url rewrite functionality & misc UX/UI updates.
+
+
+== Upgrade Notice ==
+### 1.0 ###
+Inital realease. This version has some bugs which were updated in future version.
+
+### 1.0.1 ###
+Tested some bug updates which were incomplete at this phase.
+
+### 1.0.2 ###
+Added functionality that uses the WP Rewrite API. Please use at your own discretion.
