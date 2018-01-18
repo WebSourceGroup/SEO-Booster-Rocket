@@ -41,12 +41,14 @@ Installation Instructions:
 You'll also be required to install both a <a href="https://websourcegroup.com/how-to-get-a-google-places-api-key/" target="blank">Google Places API Key<a/> & a <a href="https://websourcegroup.com/how-to-get-a-google-maps-api-key/" target="blank">Google Maps Javascript API Key</a>. You'll also need to hard code a page URI that is used to the Wordpress Rewrite API.
 
 == Changelog ==
-= 1.0.2 =
- * Updated url rewrite functionality & misc UX/UI updates.
-= 1.0.1 =
- * Initial Updates regarding known issues with the initial code base of the wordpress plugin. These including updates to form templates, properly representing search terms & more. More updates are expected within the very near term.
 = 1.0 = 
- * Initial Release. Please note that this plugin is currently in its initial Stable Build.
+* Initial Release. Please note that this plugin is currently in its initial Stable Build.
+
+= 1.0.1 =
+* Initial Updates regarding known issues with the initial code base of the wordpress plugin. These including updates to form templates, properly representing search terms & more. More updates are expected within the very near term.
+
+= 1.0.2 =
+* Updated url rewrite functionality & misc UX/UI updates.
 
 == Upgrade Notice ==
 
