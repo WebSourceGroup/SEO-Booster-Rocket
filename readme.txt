@@ -1,7 +1,7 @@
 === SEO Booster Rocket ===
 Contributors: WebSourceGroup
 Tags: Booster Rocket, SEO, SEO Boost, Places, Maps, Google, Search Engine Optimization, API, Booster Rocket, US Map, Sitemap, Geography, US State, US City, US County, USA Map, US Geography
-Donate link: https://tinyurl.com/ydaadbdy
+Donate link: https://www.paypal.me/SEOBoosterRocket
 Requires at least: 4.9.1
 Tested up to: 4.9.1
 Requires PHP: 5.6.32
