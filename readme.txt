@@ -5,7 +5,7 @@ Donate link: https://www.paypal.me/SEOBoosterRocket
 Requires at least: 4.9.1
 Tested up to: 4.9.1
 Requires PHP: 5.6.32
-Stable tag: 1.0.2
+Stable tag: 1.1
 License: GPLv2 or later.
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -50,7 +50,13 @@ You'll also be required to install both a <a href="https://websourcegroup.com/ho
 = 1.0.2 =
 * Updated url rewrite functionality & misc UX/UI updates.
 
+= 1.1 =
+* Integrated Yelp Fusion API & Fused it together with Google Places API. We hope you like the Integration.
+
 == Upgrade Notice ==
+
+= 1.1 =
+Tested with new & existing installations. We expect it to work fine.
 
 = 1.0.2 =
 Added functionality that uses the WP Rewrite API. Please use at your own discretion.

@@ -2,8 +2,9 @@
   <div id="row" style="display: table-row; width: 100%">
    <div id="left" style="display: table-cell; width: 15%;">
 	{include file="search.tpl"}
-    <h5 id="notice">{$notice}</h5>
-    <h5 id="notice">Number of Results: {$results|count}</h5>
+    <h5 id="notice">Google: {$notice_google}</h5>
+    <h5 id="notice">Yelp: {$notice_yelp}</h5>
+    <h5 id="notice">Number of Results: {$results_combined|count}</h5>
     <div id="notice">
 	<a href="#results">Take me to the Results!</a>
     </div>
@@ -17,29 +18,24 @@
 <br />
 	<a name="results"></a>
 	<table >
-	<tr>
+	<tr id="rocket-header">
 		<th>Name</th>
 		<th>Address</th>
-		<th>Open Now?</th>
 		<th>Rating</th>
-		<th>Photos/Contact Names?</th>
+		<th>Phone</th>
+		<th>Photos/Misc</th>
 	</tr>
 
-{foreach from=$results item=result name=count}
-        {if isset($result['name'])}
-        <tr>
+{foreach from=$results_combined item=result name=count}
+	<tr>
                 <td><a name="{$result['id']}"></a>{$result['name']}</td>
-                <td>{$result['formatted_address']|replace:", United States":""}</td>
-                <td>
-                {if isset($result['opening_hours'])}
-                        {if {$result['opening_hours']['open_now']} == 1}Yes{elseif {$result['opening_hours']['open_now']} == 0}No{/if}
-                {/if}
-                        </td>
+		<td>{$result['address']}</td>
 		<td>{$result['rating']}</td>
-                <td>{if isset($result['photos'])}{$result['photos'][0]['html_attributions'][0]|replace:"<a href=":"<a target='_blank' href="}{/if}</td>
-        </tr>
-        {/if}
+		<td>{$result['phone']}</td>
+		<td>{$result['photos']}</td>
+	</tr>
 {foreachelse}
 	<tr><td>No Results were Found. Please Try Again</td></tr>
 {/foreach}
+
 </table>

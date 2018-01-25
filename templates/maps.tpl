@@ -34,11 +34,11 @@ function initMap() {
 
 {/literal}
 
-        {foreach from=$results item=result name=foo}
-                {if isset($result['place_id'])}
-                        createMarker('{$result['name']|escape}',{$result['geometry']['location']['lat']},{$result['geometry']['location']['lng']},'{$result['id']}','{$result['icon']}');
-                {/if}
-        {/foreach}
+{foreach from=$results_combined item=result name=foo}       
+	{if isset($result['id'])}
+		createMarker('{$result['name']|escape}',{$result['latitude']},{$result['longitude']},'{$result['id']}','{$result['icon']}');
+	{/if}		
+{/foreach}
 }
 
 </script>
