@@ -54,7 +54,14 @@ You'll also be required to install both a <a href="https://websourcegroup.com/ho
 * Integrated Yelp Fusion API & Fused it together with Google Places API. This functionality also has duplicate record detection and merging capabilities. We hope you like the Integration! We have more integrations planned.
 * Updated UI/UX slightly - mostly the results table.
 
+= 1.1.0.1 =
+* Added a significant amount of error catching code to eliminate warings in error logs
+* autocomplete = off for sensitive information in admin forms.
+
 == Upgrade Notice ==
+
+= 1.1.0.1 =
+A recommended, but not required, update. Mostly error catching & UI/UX updates.
 
 = 1.1 =
 Tested with new & existing installations. This upgrade should work fine.

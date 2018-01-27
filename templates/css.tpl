@@ -12,12 +12,19 @@
 	table tr:nth-child(odd) { background: #f0f0f0; }
 	table tr:nth-child(even) { background: White; }
 
+	.error {
+		border-radius: 10px;
+		background: #f0f0f0;
+		padding: 5px;
+		margin: 5px;
+	}
+
         #legend, #notice, #right, #searchform {
-    border-radius: 10px;
-    background: #f0f0f0;
-    padding: 5px;
-    margin: 5px;
-    width: 225px;
+		border-radius: 10px;
+		background: #f0f0f0;
+		padding: 5px;
+		margin: 5px;
+		width: 225px;
         }
         #searchform input {
                 border-radius: 5px;

@@ -3,7 +3,7 @@
  * Plugin Name: SEO Booster Rocket
  * Plugin URI: https://websourcegroup.com/
  * Description: This plugin provides over 50,000 unique indexable web pages to your Wordpress Website! Uses Google Places API, Google Maps API & Yelp Fusion API to create an industry focused data driven user experience.
- * Version: 1.1
+ * Version: 1.1.0.1
  * Author: Web Source Group
  * Author URI: http://websourcegroup.com/seo-booster-rocket-wordpress-plugin-rocket-boost-seo-results/
  * License: GPL2
@@ -371,6 +371,9 @@ class SEO_Booster_Rocket_Places {
 	}
 
 	public function ret_maps_api_key() {
+		if($this->maps_api_key==FALSE || strlen($this->maps_api_key)==0) {
+			return FALSE;
+		}
 		return $this->maps_api_key;
 	}
 	public function retLocationCount() {
@@ -459,26 +462,27 @@ class SEO_Booster_Rocket_Places {
 		$query="term=".urlencode(esc_attr( get_option('booster-rocket-search-term')))."&location=".str_replace(" ","+",$this->town).",+".$this->state;
 		$res = $this->retYelpSearchCache($this->state,$this->town);
 		if($res == FALSE) {
-		$opts = [
-			"http" => [
-        
-				"method" => "GET",
-		        	"header" => 	
-					"Authorization: Bearer ".$this->yelp_api_key."\r\n"
+			$is_cached=0;
+			$opts = [
+				"http" => [
+					"method" => "GET",
+			        	"header" => "Authorization: Bearer ".$this->yelp_api_key."\r\n"
 				]
 			];
 			$context = stream_context_create($opts);
 			$res = file_get_contents($this->base_yelp_url.str_replace('&amp;','&',$query),false,$context);
 			$this->request_count++;
-			$this->addYelpSearchCache($this->state,$this->town,$res);
-			$this->smarty->assign('notice_yelp',"Using Live Results");
 		}else{
+			$is_cached=1;
 			$this->smarty->assign('notice_yelp',"Using Cached Results");
 		}
 		$json_results = json_decode($res,1);
 		if(isset($json_results['error_message'])) {
-			$this->smarty->assign('error',$json_results['error_message']);
+			$this->smarty->assign('error',"Yelp Fusion API: ".$json_results['error_message']);
 			return $this->smarty->fetch(__DIR__.'/templates/error.tpl');
+		}elseif(!$is_cached) {
+			$this->addYelpSearchCache($this->state,$this->town,$res);
+			$this->smarty->assign('notice_yelp',"Using Live Results");
 		}
 		$is_records=0;
 		foreach($json_results['businesses'] as $record) {
@@ -502,24 +506,23 @@ class SEO_Booster_Rocket_Places {
 				$this->state = ret_seo_long_state_to_short($this->state);
 			}
 			$query="query=".urlencode(esc_attr( get_option('booster-rocket-search-term')))."+near+".str_replace(" ","+",$this->town).",+".$this->state; //UPDATE
-			//if(strlen($next_page) > 0) {
-			//	$query.="&pagetoken=$next_page";
-			//}
-			//print "\tNow Fetching:  $this->base_google_url$query<br /><br />";
 			$res = $this->retGoogleSearchCache($this->state,$this->town);
 			if($res == FALSE) {
+				$is_cached=0;
 				$res = file_get_contents($this->base_google_url.str_replace('&amp;','&',$query));
 				$this->request_count++;
-				$this->addGoogleSearchCache($this->state,$this->town,$res);
-				$this->smarty->assign('notice_google',"Using Live Results");
 			}else{
+				$is_cached=1;
 				$this->smarty->assign('notice_google',"Using Cached Results");
 			}
 			//print "Results Length: ".strlen($res)."<br />";
 			$json_results = json_decode($res,1);
 			if(isset($json_results['error_message'])) {
-				$this->smarty->assign('error',$json_results['error_message']);
+				$this->smarty->assign('error',"Google Places API: ".$json_results['error_message']);
 				return $this->smarty->fetch(__DIR__.'/templates/error.tpl');
+			}elseif(!$is_cached) {
+				$this->addGoogleSearchCache($this->state,$this->town,$res);
+				$this->smarty->assign('notice_google',"Using Live Results");
 			}
 			$is_records=0;
 			foreach($json_results['results'] as $record) {
@@ -529,11 +532,6 @@ class SEO_Booster_Rocket_Places {
 					array_push($this->location_names,$record['name']);
 				}
 			}
-			// The following code sometimes results in an infinite loop.
-			//if(isset($json_results['next_page_token']) && strlen($json_results['next_page_token']) > 0 && $is_records) {
-				//sleep(1);
-				//array_push($results,$this->fetch_google_json($json_results['next_page_token'],$type));
-			//}
 		return $results;
 	}
 
@@ -569,18 +567,15 @@ class SEO_Booster_Rocket_Places {
 	private function is_duplicate($places,$place) {
 		for($i=0; $i<=count($places);$i++) {
 			$duplicate=0;
-			if($place['name']=='Echelon Health and Fitness') {
-				//print $place['address']." - ".$places[$i]['address']." - ".$this->text_similarity($place['address'],$places[$i]['address'])."<br />";
-			}
-			if($this->text_similarity($place['address'],$places[$i]['address']) <= $this->text_similarity_tolerance) {
+			if(isset($places[$i]['address']) && $this->text_similarity($place['address'],$places[$i]['address']) <= $this->text_similarity_tolerance) {
 				//print $place['address']." - ".$places[$i]['address']." - ".$this->text_similarity($place['address'],$places[$i]['address'])."<br />";
 				$duplicate++;
 			}
-			if($this->text_similarity($place['name'],$places[$i]['name']) <= ($this->text_similarity_tolerance/2)) {
+			if(isset($places[$i]['name']) && $this->text_similarity($place['name'],$places[$i]['name']) <= ($this->text_similarity_tolerance/2)) {
 				//print $place['name']." - ".$places[$i]['name']." - ".$this->text_similarity($place['name'],$places[$i]['name'])."<br />";
 				$duplicate++;
 			}
-			if($this->coordinate_similarity($place,$places[$i])) {
+			if(isset($places[$i]) && $this->coordinate_similarity($place,$places[$i])) {
 				//print "GEO SIMILARITY<br />";
 				$duplicate+=2;
 			}
@@ -616,8 +611,12 @@ class SEO_Booster_Rocket_Places {
 		$results = Array();
 		$google = $this->fetch_google_json();
 		$yelp = $this->fetch_yelp_json();
+		$merged_array = Array();
 
-		foreach(array_merge($google,$yelp) as $item) {
+		if(isset($google) && is_array($google)) { $merged_array=array_merge($merged_array,$google); }elseif(gettype($google)=='string') { print $google; }
+		if(isset($yelp) && is_array($yelp)) { $merged_array=array_merge($merged_array,$yelp); }elseif(gettype($yelp)=='string') { print $yelp; }
+
+		foreach($merged_array as $item) {
 			if(isset($item['id'])) {
 				$tmp_item=Array();
 				$tmp_item['id']=$item['id'];
@@ -642,8 +641,9 @@ class SEO_Booster_Rocket_Places {
 			//	}else{ //have no method for yelp atm
 			//		$tmp_item['is_open']='';
 			//	}
-
-				$tmp_item['rating']=$item['rating'];
+				if(isset($item['rating'])) {
+					$tmp_item['rating']=$item['rating'];
+				}
 
 				if(isset($item['photos'])) { //google
 					$tmp_item['photos']=preg_replace("/<a href=/","<a target='_blank' href=",$item['photos'][0]['html_attributions'][0]);
@@ -723,7 +723,9 @@ function seo_booster_rocket_map( $atts ) {
 		if(isset($atts['results']) && $atts['results'] == "false") {
 			$retval.=$places->smarty->fetch(__DIR__.'/templates/search.tpl');
 		}else{
-			$places->smarty->assign('maps_api_key',$places->ret_maps_api_key());
+			if($places->ret_maps_api_key()) {
+				$places->smarty->assign('maps_api_key',$places->ret_maps_api_key());
+			}
 			$retval.=$places->smarty->fetch(__DIR__."/templates/results.tpl");
 		}
 	}else{
@@ -834,10 +836,10 @@ function menu_seo_booster_rocket_admin_places_maps() {
 					$failed=TRUE;
 				}
 			}
-			if($success) {
+			if(isset($success) && $success) {
 				?><div class="updated notice"><p><? echo $msg; ?></p></div><?
 			}
-			if($failed) {
+			if(isset($failed) && $failed) {
 				?><div class="notice notice-failed"><p><? echo $msg; ?></p></div><?
 			}
 		}
@@ -855,22 +857,22 @@ function menu_seo_booster_rocket_admin_places_maps() {
 			<form method="post" action=""> 
 				<div valign="top">
 					<th scope="col">Yelp Fusion API Key:</th>
-					<td><input type="text" name="booster-rocket-yelp-api-key" size="100" placeholder="<? echo str_repeat("X",39); ?>" value="<?php echo esc_attr( get_option('booster-rocket-yelp-api-key' ) ); ?>" /> <a target="_blank" href="https://websourcegroup.com/how-to-get-a-yelp-fusion-api-key/">How do I get a Yelp API Key?</a>
+					<td><input autocomplete="off" type="text" name="booster-rocket-yelp-api-key" size="100" placeholder="<? echo str_repeat("X",39); ?>" value="<?php echo esc_attr( get_option('booster-rocket-yelp-api-key' ) ); ?>" /> <a target="_blank" href="https://websourcegroup.com/how-to-get-a-yelp-fusion-api-key/">How do I get a Yelp API Key?</a>
 					</td>
 				</div>
 				<div valign="top">
 					<th scope="col">Google Places API Key:</th>
-					<td><input type="text" name="booster-rocket-places-api-key" size="100" placeholder="<? echo str_repeat("X",39); ?>" value="<?php echo esc_attr( get_option('booster-rocket-places-api-key' ) ); ?>" /> <a target="_blank" href="https://websourcegroup.com/how-to-get-a-google-places-api-key/">How do I get a Places API Key?</a>
+					<td><input autocomplete="off" type="text" name="booster-rocket-places-api-key" size="100" placeholder="<? echo str_repeat("X",39); ?>" value="<?php echo esc_attr( get_option('booster-rocket-places-api-key' ) ); ?>" /> <a target="_blank" href="https://websourcegroup.com/how-to-get-a-google-places-api-key/">How do I get a Places API Key?</a>
 					</td>
 				</div>
 				<div valign="top">
 					<th scope="col">Google Maps API Key:</th>
-					<td><input type="text" name="booster-rocket-maps-api-key" size="100" placeholder="<? echo str_repeat("X",39); ?>" value="<?php echo esc_attr( get_option('booster-rocket-maps-api-key' ) ); ?>" /> <a target="_blank" href="https://websourcegroup.com/how-to-get-a-google-maps-api-key/">How do I get a Maps API Key?</a>
+					<td><input autocomplete="off" type="text" name="booster-rocket-maps-api-key" size="100" placeholder="<? echo str_repeat("X",39); ?>" value="<?php echo esc_attr( get_option('booster-rocket-maps-api-key' ) ); ?>" /> <a target="_blank" href="https://websourcegroup.com/how-to-get-a-google-maps-api-key/">How do I get a Maps API Key?</a>
 					</td>
 				</div>
 				<div valign="top">
 					<th scope="col">Booster Rocket Maps URI:</th>
-					<td><input type="text" name="booster-rocket-maps-uri" size="100" placeholder="/search-for-convinience-stores/" value="<?php echo esc_attr( get_option('booster-rocket-maps-uri' ) ); ?>" /><span class="dashicons dashicons-info" data-toggle="tooltip" title="This option works in conjunction with the '[seo_booster_rocket_process_requests]' shortcode and the resulting SiteMap. It tells the plugin what URL to use for form processing. This shoudl match the page/post URL whcih uses, or holds, the seo_booster_rocket_process_requests shortcode."></span></td>
+					<td><input autocomplete="off" type="text" name="booster-rocket-maps-uri" size="100" placeholder="/search-for-convinience-stores/" value="<?php echo esc_attr( get_option('booster-rocket-maps-uri' ) ); ?>" /><span class="dashicons dashicons-info" data-toggle="tooltip" title="This option works in conjunction with the '[seo_booster_rocket_process_requests]' shortcode and the resulting SiteMap. It tells the plugin what URL to use for form processing. This shoudl match the page/post URL whcih uses, or holds, the seo_booster_rocket_process_requests shortcode."></span></td>
 				</div>
 				<div valign="top">
 					<th scope="col">Places Search Term:</th>

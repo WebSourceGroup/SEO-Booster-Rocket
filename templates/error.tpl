@@ -1,1 +1,1 @@
-<h5>ERROR: {$error}</h5>
+<h5 class="error">ERROR: {$error}</h5>
