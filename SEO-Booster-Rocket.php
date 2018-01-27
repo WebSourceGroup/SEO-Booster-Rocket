@@ -2,7 +2,7 @@
 /**
  * Plugin Name: SEO Booster Rocket
  * Plugin URI: https://websourcegroup.com/
- * Description: This plugin provides over 50,000 unique indexable web pages to your Wordpress Website!
+ * Description: This plugin provides over 50,000 unique indexable web pages to your Wordpress Website! Uses Google Places API, Google Maps API & Yelp Fusion API to create an industry focused data driven user experience.
  * Version: 1.1
  * Author: Web Source Group
  * Author URI: http://websourcegroup.com/seo-booster-rocket-wordpress-plugin-rocket-boost-seo-results/
@@ -343,6 +343,8 @@ class SEO_Booster_Rocket_Places {
 	private $yelp_api_key;
 	private $seo_db;
 	private $max_yelp_distance;
+	private $text_similarity_tolerance;
+	private $geography_tolerance;
 
 	function __construct($town="New York",$state="NY") {
 		$this->seo_db = new SEO_Booster_Rocket_DB();
@@ -358,6 +360,8 @@ class SEO_Booster_Rocket_Places {
 		$this->base_yelp_url = "https://api.yelp.com/v3/businesses/search?";
 		$this->max_yelp_distance=10000;
 		$this->request_count=0;
+		$this->text_similarity_tolerance=15;
+		$this->geography_tolerance=0.0001;
 		$this->location_names=Array();
 		if(is_int(get_option( 'booster-rocket-cache-age' ))) {
 			$this->cache_age=intval(get_option( 'booster-rocket-cache-age' )); //UPDATE
@@ -550,6 +554,64 @@ class SEO_Booster_Rocket_Places {
 		return $this->request_count;
 	}
 
+	private function text_similarity($txt1,$txt2) {
+		return levenshtein($txt1,$txt2);
+	}
+	private function coordinate_similarity($place1,$place2) {
+		if(abs($place1['latitude']-$place2['latitude'])<$this->geography_tolerance) {
+	                if(abs($place1['longitude']-$place2['longitude'])<$this->geography_tolerance) {
+				return TRUE;
+				print abs($place1['latitude']-$place2['latitude'])." DIFF <br />";
+			}
+		}
+		return FALSE;
+	}
+	private function is_duplicate($places,$place) {
+		for($i=0; $i<=count($places);$i++) {
+			$duplicate=0;
+			if($place['name']=='Echelon Health and Fitness') {
+				//print $place['address']." - ".$places[$i]['address']." - ".$this->text_similarity($place['address'],$places[$i]['address'])."<br />";
+			}
+			if($this->text_similarity($place['address'],$places[$i]['address']) <= $this->text_similarity_tolerance) {
+				//print $place['address']." - ".$places[$i]['address']." - ".$this->text_similarity($place['address'],$places[$i]['address'])."<br />";
+				$duplicate++;
+			}
+			if($this->text_similarity($place['name'],$places[$i]['name']) <= ($this->text_similarity_tolerance/2)) {
+				//print $place['name']." - ".$places[$i]['name']." - ".$this->text_similarity($place['name'],$places[$i]['name'])."<br />";
+				$duplicate++;
+			}
+			if($this->coordinate_similarity($place,$places[$i])) {
+				//print "GEO SIMILARITY<br />";
+				$duplicate+=2;
+			}
+			//also check coordinates
+			if($duplicate>=3) {
+				//print "Dupe Score: $duplicate<br />";
+				//print $place['name']."<br /><br />";
+				return $i;
+			}
+		}
+		return FALSE;
+	}
+	private function format_phone_number($phone) {
+		$phone=intval($phone);
+		if(strlen($phone)==10 || strlen($phone)==11) {
+			return preg_replace("/^1?(\d{3})(\d{3})(\d{4})$/", "($1)$2-$3", $phone);
+		}
+		return FALSE;
+	}
+	private function merge_records($array_index,$places_array,$place) {
+		if(is_int(intval($place['rating'])) && $place['rating'] <= 5 && $place['rating'] >= 0) {
+			$places_array[$array_index]['rating']=($places_array[$array_index]['rating']+$place['rating'])/2;
+		}
+		if(strlen($places_array[$array_index]['phone'])==0) {
+			$places_array[$array_index]['phone']=$place['phone'];
+		}
+		$places_array[$array_index]['photos']=$places_array[$array_index]['photos']."<br />".$place['photos'];
+		$places_array[$array_index]['']=$place[''];
+		
+		return $places_array;
+	}
 	public function ret_combined_json_results() {
 		$results = Array();
 		$google = $this->fetch_google_json();
@@ -561,12 +623,12 @@ class SEO_Booster_Rocket_Places {
 				$tmp_item['id']=$item['id'];
 				$tmp_item['name']=$item['name'];
 
-			//address
 				if(isset($item['formatted_address'])) { //google
-					$tmp_item['address']=preg_replace('/, United States/','',$item['formatted_address']);
+					$tmp = preg_replace('/, United States/','',$item['formatted_address']);
+					$tmp_item['address'] = $tmp;
 				}elseif(isset($item['location'])) { //yelp
 					if(strlen($item['location']['address2'])>0) {
-					$tmp_item['address']=$item['location']['address1'].' '.$item['location']['address2'].', '.$item['location']['city'].', '.$item['location']['state'].' '.$item['location']['zip_code'];
+						$tmp_item['address']=$item['location']['address1'].' '.$item['location']['address2'].', '.$item['location']['city'].', '.$item['location']['state'].' '.$item['location']['zip_code'];
 					}else{
 						$tmp_item['address']=$item['location']['address1'].', '.$item['location']['city'].', '.$item['location']['state'].' '.$item['location']['zip_code'];
 					}
@@ -583,7 +645,6 @@ class SEO_Booster_Rocket_Places {
 
 				$tmp_item['rating']=$item['rating'];
 
-			//photos/contact names
 				if(isset($item['photos'])) { //google
 					$tmp_item['photos']=preg_replace("/<a href=/","<a target='_blank' href=",$item['photos'][0]['html_attributions'][0]);
 				}elseif(isset($item['image_url'])){
@@ -601,12 +662,19 @@ class SEO_Booster_Rocket_Places {
 				}
 
 				if(isset($item['phone'])) { //yelp
-					$tmp_item['phone']="<a href='tel:".$item['phone']."'>".$item['phone'].'</a>';
+					//$this->format_phone_number($item['phone']);
+					$tmp_item['phone']="<a href='tel:".$item['phone']."'>".$this->format_phone_number($item['phone']).'</a>';
 				}else{
 					$tmp_item['phone']='';
 				}
-
-				array_push($results,$tmp_item);
+				$dupe_val=$this->is_duplicate($results,$tmp_item);
+				if($dupe_val != FALSE) {
+					//print $dupe_val." <br />";
+					$results = $this->merge_records($dupe_val,$results,$tmp_item);
+					//print "Potential Duplicate Found<br />";
+				}else{
+					array_push($results,$tmp_item);
+				}
 			}
 		}
 		return $results;

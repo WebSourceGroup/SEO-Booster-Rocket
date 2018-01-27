@@ -1,6 +1,6 @@
 === SEO Booster Rocket ===
 Contributors: WebSourceGroup
-Tags: Booster Rocket, SEO, SEO Boost, Places, Maps, Google, Search Engine Optimization, API, Booster Rocket, US Map, Sitemap, Geography, US State, US City, US County, USA Map, US Geography
+Tags: Booster Rocket, SEO, SEO Boost, Places, Maps, Google, Search Engine Optimization, API, Booster Rocket, US Map, Sitemap, Geography, US State, US City, US County, USA Map, US Geography, Yelp, Fusion API
 Donate link: https://www.paypal.me/SEOBoosterRocket
 Requires at least: 4.9.1
 Tested up to: 4.9.1
@@ -9,12 +9,12 @@ Stable tag: 1.1
 License: GPLv2 or later.
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-The SEO Booster Rocket is used to increase your Wordpress Websites SEO Footprint. It currently uses Google Places & Maps API to create over 50,000 additional unique indexable URL\'s. These URL's are created by picking a search term (ex: Convenience Stores) and allows a user/search engine the ability to navigate to results by State, County & City. This system only supports US Geographies at this time. By using this software you agree that you are using this software at your Own Risk and that this software provides no guarantees. This plugin supports two short codes: [seo_booster_rocket_process_requests] &amp; [seo_booster_rocket_map]
+The SEO Booster Rocket is used to increase your Wordpress Websites SEO Footprint & Functionality. It currently uses Google Places API, Google Maps API & Yelp Fusion API to create over 50,000 additional unique indexable URL's. These URL's are created by picking a search term (ex: Yoga Studios) and allows a user/search engine the ability to navigate to results by State, County & City. This system only supports US Geographies at this time. By using this software you agree that you are using this software at your Own Risk and that this software provides no guarantees. This plugin supports two short codes: [seo_booster_rocket_process_requests] &amp; [seo_booster_rocket_map]
 
 == Description ==
 Do you need to provide additional URL's to search engines like Google or Bing? Does your website have less than 20 pages but you'd wish to have 50,000? Is your website's content themed to include searchable Google Map Business Listings for every US State, County, and City? If you've answered yes to any of these questions then this SEO Boster Rocket might put your website into orbit.
 
-This plugin uses the Google Places API & the Google Maps API and combines it with a database of every US State, County, and Town, which can be downloaded after installation, that increases the searchable web pages by over 50,000 pages! Once you fill in the Place API, Maps API, Search Results URI & set your preferred Keyword you'll be able to submit an additional sitemap to your preferred search engine resulting in a massive increase of indexable pages!
+The SEO Booster Rocket plugin uses the Google Places API, the Google Maps API & the Yelp Fusion API and merges this data together. It creates a single result for each location record from multiple data sources. This plugin also makes use of a database containing every US State, County, and Town, which can be downloaded after installation. These State, County, Town database increases the searchable footprint of your web site by adding over 50,000 unique web pages! Once you fill in the Places API, Maps API, Yelp API, Search Results URI & set your preferred Keyword you'll be able to submit an additional sitemap to your preferred search engine resulting in a massive increase of indexable pages!
 
 For a live example of this plugin please visit: <a href="https://usayo.ga/find-yoga-studio-by-geography/" target="_blank">USA Yoga</a>
 
@@ -51,12 +51,13 @@ You'll also be required to install both a <a href="https://websourcegroup.com/ho
 * Updated url rewrite functionality & misc UX/UI updates.
 
 = 1.1 =
-* Integrated Yelp Fusion API & Fused it together with Google Places API. We hope you like the Integration.
+* Integrated Yelp Fusion API & Fused it together with Google Places API. This functionality also has duplicate record detection and merging capabilities. We hope you like the Integration! We have more integrations planned.
+* Updated UI/UX slightly - mostly the results table.
 
 == Upgrade Notice ==
 
 = 1.1 =
-Tested with new & existing installations. We expect it to work fine.
+Tested with new & existing installations. This upgrade should work fine.
 
 = 1.0.2 =
 Added functionality that uses the WP Rewrite API. Please use at your own discretion.

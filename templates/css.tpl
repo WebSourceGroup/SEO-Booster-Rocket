@@ -7,6 +7,7 @@
       }
 
         table th { border-bottom: 1px solid #000; white-space: nowrap; text-align: center; border-radius: 10px 10px 0px 0px; }
+	table tr td { text-align: center; }
         table td { margin: 3px; border: 1px solid #fff; }
 	table tr:nth-child(odd) { background: #f0f0f0; }
 	table tr:nth-child(even) { background: White; }

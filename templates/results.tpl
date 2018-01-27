@@ -27,11 +27,11 @@
 	</tr>
 
 {foreach from=$results_combined item=result name=count}
-	<tr>
+	<tr id="rocket-results">
                 <td><a name="{$result['id']}"></a>{$result['name']}</td>
-		<td>{$result['address']}</td>
+		<td><a href="https://maps.google.com/maps/place/{$result['name']|escape}/@{$result['latitude']},{$result['longitude']}" target="_blank">{$result['address']}</a></td>
 		<td>{$result['rating']}</td>
-		<td>{$result['phone']}</td>
+		<td nowrap>{$result['phone']}</td>
 		<td>{$result['photos']}</td>
 	</tr>
 {foreachelse}
