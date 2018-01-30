@@ -3,7 +3,7 @@
  * Plugin Name: SEO Booster Rocket
  * Plugin URI: https://websourcegroup.com/
  * Description: This plugin provides over 50,000 unique indexable web pages to your Wordpress Website! Uses Google Places API, Google Maps API & Yelp Fusion API to create an industry focused data driven user experience.
- * Version: 1.1.0.1
+ * Version: 1.1.1
  * Author: Web Source Group
  * Author URI: http://websourcegroup.com/seo-booster-rocket-wordpress-plugin-rocket-boost-seo-results/
  * License: GPL2

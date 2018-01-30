@@ -5,7 +5,7 @@ Donate link: https://www.paypal.me/SEOBoosterRocket
 Requires at least: 4.9.1
 Tested up to: 4.9.1
 Requires PHP: 5.6.32
-Stable tag: 1.1.0.1
+Stable tag: 1.1.1
 License: GPLv2 or later.
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -58,7 +58,16 @@ You'll also be required to install both a <a href="https://websourcegroup.com/ho
 * Added a significant amount of error catching code to eliminate warings in error logs
 * autocomplete = off for sensitive information in admin forms.
 
+= 1.1.1 =
+* Added support for Facebook Graph API
+* Updated the duplicate record detection algorithm.
+* Added error handling functionality & improvements.
+* Minor Template updates.
+
 == Upgrade Notice ==
+
+= 1.1.1 =
+Added support for Facebook Graph API. This updated allows 3 content providers.
 
 = 1.1.0.1 =
 A recommended, but not required, update. Mostly error catching & UI/UX updates.
