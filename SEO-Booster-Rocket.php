@@ -341,10 +341,15 @@ class SEO_Booster_Rocket_Places {
 	private $places_api_key;
 	private $maps_api_key;
 	private $yelp_api_key;
+	private $facebook_api_key;
 	private $seo_db;
 	private $max_yelp_distance;
 	private $text_similarity_tolerance;
 	private $geography_tolerance;
+	private $base_facebook_url;
+	private $place_facebook_url;
+	private $facebook_place_fields;
+	private $max_facebook_distance;
 
 	function __construct($town="New York",$state="NY") {
 		$this->seo_db = new SEO_Booster_Rocket_DB();
@@ -356,12 +361,17 @@ class SEO_Booster_Rocket_Places {
 		$this->places_api_key = get_option('booster-rocket-places-api-key');
 		$this->maps_api_key = get_option('booster-rocket-maps-api-key');
 		$this->yelp_api_key = get_option('booster-rocket-yelp-api-key');
+		$this->facebook_api_key = get_option('booster-rocket-facebook-api-key');
+		$this->max_yelp_distance=10000;
+		$this->max_facebook_distance=10000;
 		$this->base_google_url = "https://maps.googleapis.com/maps/api/place/textsearch/json?key=".$this->places_api_key."&";
 		$this->base_yelp_url = "https://api.yelp.com/v3/businesses/search?";
-		$this->max_yelp_distance=10000;
-		$this->request_count=0;
-		$this->text_similarity_tolerance=15;
-		$this->geography_tolerance=0.0001;
+		$this->base_facebook_url = "https://graph.facebook.com/v2.11/search?type=place&distance=".$this->max_facebook_distance."&access_token=".urlencode(esc_attr($this->facebook_api_key))."&";
+		$this->place_facebook_url = "https://graph.facebook.com/v2.11/";//{place ID}?fields={place information}";
+		$this->facebook_place_fields = "name,hours,location,overall_star_rating,phone,picture,website";
+		//$this->facebook_place_fields = "name,hours,location,overall_star_rating,phone,photos,picture,website";
+		$this->text_similarity_tolerance=12;
+		$this->geography_tolerance=0.0005;
 		$this->location_names=Array();
 		if(is_int(get_option( 'booster-rocket-cache-age' ))) {
 			$this->cache_age=intval(get_option( 'booster-rocket-cache-age' )); //UPDATE
@@ -394,6 +404,22 @@ class SEO_Booster_Rocket_Places {
 				$state = $this->retStateShortName($state);
 			}
 			$result = $this->seo_db->db->get_results("SELECT json_response FROM ".$this->seo_db->ret_yelp_cache_table()." WHERE state = '$state' AND city = '$city' AND DATEDIFF(date,NOW()) < ".$this->cache_age); // add cache expiration mechanism.
+
+			if(isset($result[0])) {
+				return $result[0]->json_response;
+			}
+		}
+		return FALSE;
+	}
+
+	private function retFacebookSearchCache($state,$city) {
+		$state=$this->cleanVariable($state);
+		$city=$this->cleanVariable($city);
+		if(strlen($state) >= 2 && strlen($city) > 2) {
+			if(strlen($state) > 2) {
+				$state = $this->retStateShortName($state);
+			}
+			$result = $this->seo_db->db->get_results("SELECT json_response FROM ".$this->seo_db->ret_facebook_cache_table()." WHERE state = '$state' AND city = '$city' AND DATEDIFF(date,NOW()) < ".$this->cache_age); // add cache expiration mechanism.
 
 			if(isset($result[0])) {
 				return $result[0]->json_response;
@@ -440,6 +466,17 @@ class SEO_Booster_Rocket_Places {
 		}
 		return FALSE;
 	}
+	private function addFacebookSearchCache($state,$city,$json_response) {
+		$state=$this->cleanVariable($state);
+		$city=$this->cleanVariable($city);
+		$json_response=$this->seo_db->db->_real_escape($json_response);
+		if($this->seo_db->db->query("INSERT INTO ".$this->seo_db->ret_facebook_cache_table()." VALUES('$state','$city','$json_response',NOW())")) {
+			return TRUE;
+		}else{
+			print mysql_error();
+		}
+		return FALSE;
+	}
 	private function addGoogleSearchCache($state,$city,$json_response) {
 		$state=$this->cleanVariable($state);
 		$city=$this->cleanVariable($city);
@@ -471,7 +508,6 @@ class SEO_Booster_Rocket_Places {
 			];
 			$context = stream_context_create($opts);
 			$res = file_get_contents($this->base_yelp_url.str_replace('&amp;','&',$query),false,$context);
-			$this->request_count++;
 		}else{
 			$is_cached=1;
 			$this->smarty->assign('notice_yelp',"Using Cached Results");
@@ -494,7 +530,62 @@ class SEO_Booster_Rocket_Places {
 				}
 			}
 		}
-		print "<!-- "; print_r($results); print "-->";
+		//print "<!-- "; print_r($results); print "-->";
+		return $results;
+	}
+
+	public function fetch_facebook_json() {
+		if(strlen($this->facebook_api_key)==0) { return FALSE; }
+
+			$results=Array();
+			if(strlen($this->state) > 2) {
+				$this->state = ret_seo_long_state_to_short($this->state);
+			}
+			
+			$geography=$this->ret_town_geo();
+			if($geography == FALSE) { return FALSE; }
+			$query="q=".urlencode(esc_attr( get_option('booster-rocket-search-term')))."&center=".$geography[0].','.$geography[1];
+			$res = $this->retFacebookSearchCache($this->state,$this->town);
+			if($res == FALSE) {
+				$is_cached=0;
+				$res = file_get_contents($this->base_facebook_url.$query);
+				$res = json_decode($res,1);
+				if(isset($json_results['error_message'])) {
+					$this->smarty->assign('error',"Facebook Graph API: ".$json_results['error_message']);
+					return $this->smarty->fetch(__DIR__.'/templates/error.tpl');
+				}
+				$facebook_json='[';
+				for($i=0; $i<count($res['data']); $i++ ) {
+					$place_query = $res['data'][$i]['id']."?&access_token=".urlencode(esc_attr($this->facebook_api_key))."&fields=".$this->facebook_place_fields;
+//print $this->place_facebook_url.str_replace('&amp;','&',$place_query);
+					$place = file_get_contents($this->place_facebook_url.str_replace('&amp;','&',$place_query));
+					$facebook_json.=$place;
+					if($i<(count($res['data'])-1)) {
+						$facebook_json.=',';
+					}
+				}
+				$facebook_json.=']';
+				$res = $facebook_json;
+			}else{
+				$is_cached=1;
+				$this->smarty->assign('notice_facebook',"Using Cached Results");
+			}
+			$json_results = json_decode($res,1);
+			if(isset($json_results['error_message'])) {
+				$this->smarty->assign('error',"Google Places API: ".$json_results['error_message']);
+				return $this->smarty->fetch(__DIR__.'/templates/error.tpl');
+			}elseif(!$is_cached) {
+				$this->addFacebookSearchCache($this->state,$this->town,$res);
+				$this->smarty->assign('notice_facebook',"Using Live Results");
+			}
+			$is_records=0;
+			foreach($json_results as $record) {
+				$is_records=1;
+				//if(!in_array($record['name'],$this->location_names)) {
+					array_push($results,$record);
+					array_push($this->location_names,$record['name']);
+				//}
+			}
 		return $results;
 	}
 
@@ -510,7 +601,6 @@ class SEO_Booster_Rocket_Places {
 			if($res == FALSE) {
 				$is_cached=0;
 				$res = file_get_contents($this->base_google_url.str_replace('&amp;','&',$query));
-				$this->request_count++;
 			}else{
 				$is_cached=1;
 				$this->smarty->assign('notice_google',"Using Cached Results");
@@ -538,28 +628,24 @@ class SEO_Booster_Rocket_Places {
 	public function ret_town_geo() {
 		//$res = file_get_contents("https://maps.googleapis.com/maps/api/geocode/json?address=".str_replace(' ','+',$this->town).",+".str_replace(' ','+',$this->state)."&key=".$this->places_api_key); //Doesn't seem to need an api key anymore?
 		$res = file_get_contents("https://maps.googleapis.com/maps/api/geocode/json?address=".str_replace(' ','+',$this->town).",+".str_replace(' ','+',$this->state));
-		$this->request_count++;
 		$json_result = json_decode($res,1);
 		if(isset($json_result['results'][0]['geometry']['location'])) {
 			return Array($json_result['results'][0]['geometry']['location']['lat'],$json_result['results'][0]['geometry']['location']['lng']);
 		}else{
 			#return to suffolk county ny
-			return Array('40.792240','-73.138260');
+			return FALSE;
+			//return Array('40.792240','-73.138260');
 		}
-	}
-
-	public function ret_request_count () {
-		return $this->request_count;
 	}
 
 	private function text_similarity($txt1,$txt2) {
 		return levenshtein($txt1,$txt2);
 	}
 	private function coordinate_similarity($place1,$place2) {
-		if(abs($place1['latitude']-$place2['latitude'])<$this->geography_tolerance) {
+		if(isset($place1['latitude']) && isset($place2['latitude']) && abs($place1['latitude']-$place2['latitude'])<$this->geography_tolerance) {
 	                if(abs($place1['longitude']-$place2['longitude'])<$this->geography_tolerance) {
 				return TRUE;
-				print abs($place1['latitude']-$place2['latitude'])." DIFF <br />";
+				//print abs($place1['latitude']-$place2['latitude'])." DIFF <br />";
 			}
 		}
 		return FALSE;
@@ -567,16 +653,25 @@ class SEO_Booster_Rocket_Places {
 	private function is_duplicate($places,$place) {
 		for($i=0; $i<=count($places);$i++) {
 			$duplicate=0;
-			if(isset($places[$i]['address']) && $this->text_similarity($place['address'],$places[$i]['address']) <= $this->text_similarity_tolerance) {
-				//print $place['address']." - ".$places[$i]['address']." - ".$this->text_similarity($place['address'],$places[$i]['address'])."<br />";
-				$duplicate++;
-			}
-			if(isset($places[$i]['name']) && $this->text_similarity($place['name'],$places[$i]['name']) <= ($this->text_similarity_tolerance/2)) {
+			if(isset($places[$i]['name']) && $this->text_similarity($place['name'],$places[$i]['name']) == 0) {
+				$duplicate+=2;
+				//print "EXACT NAME MATCH FOUND - ".$place['name']."<br />";
+			}elseif(isset($places[$i]['name']) && $this->text_similarity($place['name'],$places[$i]['name']) <= ($this->text_similarity_tolerance/2)) {
 				//print $place['name']." - ".$places[$i]['name']." - ".$this->text_similarity($place['name'],$places[$i]['name'])."<br />";
 				$duplicate++;
 			}
+			if(isset($places[$i]['address']) && $this->text_similarity($place['address'],$places[$i]['address']) == 0) {
+				$duplicate+=2;
+			}elseif(isset($places[$i]['address']) && $this->text_similarity($place['address'],$places[$i]['address']) <= $this->text_similarity_tolerance) {
+				//print $place['address']." - ".$places[$i]['address']." - ".$this->text_similarity($place['address'],$places[$i]['address'])."<br />";
+				$duplicate++;
+			}
+			if(isset($places[$i]['phone_formatted']) && strlen($places[$i]['phone_formatted']) > 0 && $this->text_similarity($place['phone_formatted'],$places[$i]['phone_formatted']) == 0) {
+				$duplicate++;
+				//print "EXACT PHONE NUMBER FOUND - ".$place['phone_formatted']."<br />";
+			}
 			if(isset($places[$i]) && $this->coordinate_similarity($place,$places[$i])) {
-				//print "GEO SIMILARITY<br />";
+				//print "GEO SIMILARITY - ".$place['name']." - ".$places[$i]['name']."<br />";
 				$duplicate+=2;
 			}
 			//also check coordinates
@@ -589,7 +684,7 @@ class SEO_Booster_Rocket_Places {
 		return FALSE;
 	}
 	private function format_phone_number($phone) {
-		$phone=intval($phone);
+		$phone = preg_replace("/[^0-9,.]/", "", $phone);
 		if(strlen($phone)==10 || strlen($phone)==11) {
 			return preg_replace("/^1?(\d{3})(\d{3})(\d{4})$/", "($1)$2-$3", $phone);
 		}
@@ -602,8 +697,8 @@ class SEO_Booster_Rocket_Places {
 		if(strlen($places_array[$array_index]['phone'])==0) {
 			$places_array[$array_index]['phone']=$place['phone'];
 		}
-		$places_array[$array_index]['photos']=$places_array[$array_index]['photos']."<br />".$place['photos'];
-		$places_array[$array_index]['']=$place[''];
+		$places_array[$array_index]['photos'].="<br />".$place['photos'];
+		//$places_array[$array_index]['']=$place[''];
 		
 		return $places_array;
 	}
@@ -611,10 +706,12 @@ class SEO_Booster_Rocket_Places {
 		$results = Array();
 		$google = $this->fetch_google_json();
 		$yelp = $this->fetch_yelp_json();
+		$facebook = $this->fetch_facebook_json();
 		$merged_array = Array();
 
 		if(isset($google) && is_array($google)) { $merged_array=array_merge($merged_array,$google); }elseif(gettype($google)=='string') { print $google; }
 		if(isset($yelp) && is_array($yelp)) { $merged_array=array_merge($merged_array,$yelp); }elseif(gettype($yelp)=='string') { print $yelp; }
+		if(isset($facebook) && is_array($facebook)) { $merged_array=array_merge($merged_array,$facebook); }elseif(gettype($facebook)=='string') { print $facebook; }
 
 		foreach($merged_array as $item) {
 			if(isset($item['id'])) {
@@ -625,32 +722,48 @@ class SEO_Booster_Rocket_Places {
 				if(isset($item['formatted_address'])) { //google
 					$tmp = preg_replace('/, United States/','',$item['formatted_address']);
 					$tmp_item['address'] = $tmp;
-				}elseif(isset($item['location'])) { //yelp
-					if(strlen($item['location']['address2'])>0) {
-						$tmp_item['address']=$item['location']['address1'].' '.$item['location']['address2'].', '.$item['location']['city'].', '.$item['location']['state'].' '.$item['location']['zip_code'];
-					}else{
-						$tmp_item['address']=$item['location']['address1'].', '.$item['location']['city'].', '.$item['location']['state'].' '.$item['location']['zip_code'];
+				}elseif(isset($item['location'])) { //yelp && facebook
+					if(isset($item['location']['address1'])) { //yelp
+						if(strlen($item['location']['address2'])>0) {
+							$tmp_item['address']=$item['location']['address1'].' '.$item['location']['address2'].', '.$item['location']['city'].', '.$item['location']['state'].' '.$item['location']['zip_code'];
+						}elseif(strlen($item['location']['address1'])>0) {
+							$tmp_item['address']=$item['location']['address1'].', '.$item['location']['city'].', '.$item['location']['state'].' '.$item['location']['zip_code'];
+						}else{
+							$tmp_item['address']=$item['location']['city'].', '.$item['location']['state'].' '.$item['location']['zip_code'];
+						}
+
+					}elseif(isset($item['location']['street'])) { //facebook
+						if(isset($item['location']['street']) && strlen($item['location']['street']) > 0) {
+							$tmp_item['address']=$item['location']['street'].', '.$item['location']['city'].', '.$item['location']['state'].' '.$item['location']['zip'];
+						}else{
+							$tmp_item['address']=$item['location']['city'].', '.$item['location']['state'].' '.$item['location']['zip'];
+
+						}
 					}
 				}else{ //no address
 					$tmp_item['address']='';
 				}
-
 			//open now?
 			//	if(isset($item['opening_hours'])) { //google
 			//		$tmp_item['is_open']='';
 			//	}else{ //have no method for yelp atm
 			//		$tmp_item['is_open']='';
 			//	}
-				if(isset($item['rating'])) {
+				if(isset($item['rating'])) { //google, yelp
 					$tmp_item['rating']=$item['rating'];
+				}elseif(isset($item['overall_star_rating'])) { //facebook
+					$tmp_item['rating']=$item['overall_star_rating'];
 				}
 
 				if(isset($item['photos'])) { //google
-					$tmp_item['photos']=preg_replace("/<a href=/","<a target='_blank' href=",$item['photos'][0]['html_attributions'][0]);
-				}elseif(isset($item['image_url'])){
+					if(isset($item['photos'][0]['html_attributions'][0])) { //google
+						$tmp_item['photos']=preg_replace("/<a href=/","<a target='_blank' href=",$item['photos'][0]['html_attributions'][0]);
+					}
+				}elseif(isset($item['image_url'])){ //yelp
 					$tmp_item['photos']='<img src="'.$item['image_url'].'" />';
+				}elseif(isset($item['picture'])) { //facebook
+					$tmp_item['photos']='<img src="'.$item['picture']['data']['url'].'" />';
 				}
-
 				if(isset($item['coordinates'])) { //yelp
 					$tmp_item['latitude']=$item['coordinates']['latitude'];
 					$tmp_item['longitude']=$item['coordinates']['longitude'];
@@ -659,14 +772,22 @@ class SEO_Booster_Rocket_Places {
 					$tmp_item['latitude']=$item['geometry']['location']['lat'];
 					$tmp_item['longitude']=$item['geometry']['location']['lng'];
 					$tmp_item['icon']=$item['icon'];
+				}elseif(isset($item['location'])) {
+					$tmp_item['latitude']=$item['location']['latitude'];
+					$tmp_item['longitude']=$item['location']['longitude'];
+					$tmp_item['icon']='https://maps.gstatic.com/mapfiles/place_api/icons/generic_business-71.png';
 				}
-
-				if(isset($item['phone'])) { //yelp
+				if(isset($item['phone'])) { //yelp && facebook
 					//$this->format_phone_number($item['phone']);
 					$tmp_item['phone']="<a href='tel:".$item['phone']."'>".$this->format_phone_number($item['phone']).'</a>';
+					$tmp_item['phone_formatted']=$this->format_phone_number($item['phone']);
 				}else{
 					$tmp_item['phone']='';
 				}
+				if(isset($item['website'])) {
+					$tmp_item['website']="<a href='http://".$item['website']."/' target='_blank'>Visit ".$tmp_item['name']."'s Website</a><br />";
+				}
+
 				$dupe_val=$this->is_duplicate($results,$tmp_item);
 				if($dupe_val != FALSE) {
 					//print $dupe_val." <br />";
@@ -715,7 +836,6 @@ function seo_booster_rocket_map( $atts ) {
 
 		$places->smarty->assign('results_combined',$places->ret_combined_json_results());
 
-		$places->smarty->assign('request_count',$places->ret_request_count());
 		$places->smarty->assign('geolocation',$places->ret_town_geo());
 		if(get_option('booster-rocket-search-term')) {
 			$places->smarty->assign('search_term',get_option('booster-rocket-search-term'));
@@ -748,6 +868,11 @@ function menu_seo_booster_rocket_admin_places_maps() {
 		if(isset($_POST)) {
 			$msg="";
 			$success=FALSE;
+			if(isset($_POST['booster-rocket-facebook-api-key']) && wp_verify_nonce($_REQUEST['seo-booster-rocket-update-config'],'seo-booster-rocket-update-config')==1) {
+				update_option('booster-rocket-facebook-api-key',$seo_db->cleanVariable($_POST['booster-rocket-facebook-api-key']));
+				$msg="SEO Booster Rocket Options Saved.";
+				$success=TRUE;
+			}
 			if(isset($_POST['booster-rocket-yelp-api-key']) && wp_verify_nonce($_REQUEST['seo-booster-rocket-update-config'],'seo-booster-rocket-update-config')==1) {
 				update_option('booster-rocket-yelp-api-key',$seo_db->cleanVariable($_POST['booster-rocket-yelp-api-key']));
 				$msg="SEO Booster Rocket Options Saved.";
@@ -820,19 +945,28 @@ function menu_seo_booster_rocket_admin_places_maps() {
 			}
 			if(isset($_POST['seo_booster_rocket_clear_google_cache']) && wp_verify_nonce($_REQUEST['seo-booster-rocket-clear-google-cache'],'seo-booster-rocket-clear-google-cache')==1) {
 				if($seo_db->clear_google_geography_cache()) {
-					$msg="SEO Booster Rocket Cached Searches Sucessfully Cleared.";
+					$msg="SEO Booster Rocket Google Cached Searches Sucessfully Cleared.";
 					$success=TRUE;
 				}else{
-					$msg="SEO Booster Rocket Cached Searches Failed to Clear.";
+					$msg="SEO Booster Rocket Google Cached Searches Failed to Clear.";
 					$failed=TRUE;
 				}
 			}
 			if(isset($_POST['seo_booster_rocket_clear_yelp_cache']) && wp_verify_nonce($_REQUEST['seo-booster-rocket-clear-yelp-cache'],'seo-booster-rocket-clear-yelp-cache')==1) {
 				if($seo_db->clear_yelp_geography_cache()) {
-					$msg="SEO Booster Rocket Cached Searches Sucessfully Cleared.";
+					$msg="SEO Booster Rocket Yelp Cached Searches Sucessfully Cleared.";
 					$success=TRUE;
 				}else{
-					$msg="SEO Booster Rocket Cached Searches Failed to Clear.";
+					$msg="SEO Booster Rocket Yelp Cached Searches Failed to Clear.";
+					$failed=TRUE;
+				}
+			}
+			if(isset($_POST['seo_booster_rocket_clear_facebook_cache']) && wp_verify_nonce($_REQUEST['seo-booster-rocket-clear-facebook-cache'],'seo-booster-rocket-clear-facebook-cache')==1) {
+				if($seo_db->clear_facebook_geography_cache()) {
+					$msg="SEO Booster Rocket Facebook Cached Searches Sucessfully Cleared.";
+					$success=TRUE;
+				}else{
+					$msg="SEO Booster Rocket Facebook Cached Searches Failed to Clear.";
 					$failed=TRUE;
 				}
 			}
@@ -844,7 +978,7 @@ function menu_seo_booster_rocket_admin_places_maps() {
 			}
 		}
 		if(!$seo_db->are_tables_installed()) {
-			?><div class="notice notice-error"><p>SEO Booster Rocket Database Tables Are Not Installed! </p><form method="POST" action=""><input type="hidden" name="seo_booster_rocket_install_tables" value="1" /><?php wp_nonce_field('seo-booster-rocket-install-tables','seo-booster-rocket-install-tables'); ?><input type="submit" value="Click Here to Install Tables Now" /></form></div><?
+			?><div class="notice notice-error"><p>SEO Booster Rocket Database Tables Are Not Installed or Need to be Updated!</p><form method="POST" action=""><input type="hidden" name="seo_booster_rocket_install_tables" value="1" /><?php wp_nonce_field('seo-booster-rocket-install-tables','seo-booster-rocket-install-tables'); ?><input type="submit" value="Click Here to Install Tables Now" /></form></div><?
 		}else{
 			if(!$seo_db->is_geography_data_installed()) {
 				?><div class="notice notice-error"><p>SEO Booster Rocket Geography Data Is Not Installed! </p><form method="POST" action=""><input type="hidden" name="seo_booster_rocket_install_geo_data" value="1" /><?php wp_nonce_field('seo-booster-rocket-install-geo','seo-booster-rocket-install-geo'); ?><input type="submit" value="Click Here to Install Geography Data Now" /></form><p>Downloading this data reqiures a connection to the Web Source Group Server. This communication is encrypted using HTTPS technologies. Please be patient as this process may take up to a minute.</p></div><?
@@ -855,6 +989,11 @@ function menu_seo_booster_rocket_admin_places_maps() {
 			<h1>SEO Booster Rocket - Places & Maps</h1>
 			<br />
 			<form method="post" action=""> 
+				<div valign="top">
+					<th scope="col">Facebook Access Token/API Key:</th>
+					<td><input autocomplete="off" type="text" name="booster-rocket-facebook-api-key" size="100" placeholder="<? echo str_repeat("X",39); ?>" value="<?php echo esc_attr( get_option('booster-rocket-facebook-api-key' ) ); ?>" /> <a target="_blank" href="https://websourcegroup.com/how-to-get-a-facebook-graph-access-token/">How do I get a Facebook Access Token/API Key?</a>
+					</td>
+				</div>
 				<div valign="top">
 					<th scope="col">Yelp Fusion API Key:</th>
 					<td><input autocomplete="off" type="text" name="booster-rocket-yelp-api-key" size="100" placeholder="<? echo str_repeat("X",39); ?>" value="<?php echo esc_attr( get_option('booster-rocket-yelp-api-key' ) ); ?>" /> <a target="_blank" href="https://websourcegroup.com/how-to-get-a-yelp-fusion-api-key/">How do I get a Yelp API Key?</a>
@@ -901,6 +1040,10 @@ function menu_seo_booster_rocket_admin_places_maps() {
 					<th scope="col">Number of Cached Yelp Searches:</th>
 					<td><? echo $seo_db->cached_yelp_geography_data_count(); if($seo_db->cached_yelp_geography_data_count() != 0) { ?> <form method="POST" action=""><input type="hidden" name="seo_booster_rocket_clear_yelp_cache" value="1" /><?php wp_nonce_field('seo-booster-rocket-clear-yelp-cache','seo-booster-rocket-clear-yelp-cache'); ?><input type="submit" value="Clear Yelp Search Cache" /></form> <? } ?></td>
 				</div><br />
+				<div valign="top">
+					<th scope="col">Number of Cached Facebook Searches:</th>
+					<td><? echo $seo_db->cached_facebook_geography_data_count(); if($seo_db->cached_facebook_geography_data_count() != 0) { ?> <form method="POST" action=""><input type="hidden" name="seo_booster_rocket_clear_facebook_cache" value="1" /><?php wp_nonce_field('seo-booster-rocket-clear-facebook-cache','seo-booster-rocket-clear-facebook-cache'); ?><input type="submit" value="Clear Facebook Search Cache" /></form> <? } ?></td>
+				</div><br />
 
 				<p>* We recommend restricting the Places API Key to your server address. This has been detected as: <b><? echo $_SERVER['SERVER_NAME']; ?></b> using the IP Address <b><? echo gethostbyname($_SERVER['SERVER_NAME']); ?></b></p>
 				<p>* We recommend restricting the Maps API Key to your server referral address. This has been detected as: <b><? echo $_SERVER['SERVER_NAME']; ?></b></p>
@@ -931,9 +1074,9 @@ function menu_seo_booster_rocket() {
 				</div>
 			</div>
 			<div class="header_left_div">
-				<p>This plugin was developed with the sole purpose of increasing the indexable footprint of your Wordpress Website. This plugin can rapidly transform a 5 page web site into a 50,000+ page website in minutes!</p>
+				<p>This plugin was developed with the sole purpose of increasing the indexable footprint of your Wordpress Website while providing a unique Geographic Search Experience. This plugin can rapidly transform a 5 page web site into a 50,000+ page website in minutes!</p>
 				<p>The data that is used by this plugin only supports US Based States, Counties &amp; Towns. If you have access to i18n geographic data then please <a href="https://websourcegroup.com/contact-web-source-group/" target="_blank">contact us to determine integration strategies</a>.</p>
-				<p>A demo is available for viewing <a href="https://usayo.ga/search-for-a-yoga-studio/" target="_blank">Here</a> and <a href="https://usayo.ga'.esc_attr(get_option('booster-rocket-maps-uri')).'" target="_blank">Here</a>.</p>
+				<p>A demo is available for viewing <a href="https://usayo.ga/search-for-a-yoga-studio/" target="_blank">Here</a> and <a href="https://usayo.ga/find-yoga-studio-by-geography/" target="_blank">Here</a>.</p>
 				<h3>Configure this Plugin</h3>
 				<h5><a href="admin.php?page=seo-booster-rocket-places-maps">Places & Maps</a></h5>
 				<br />
@@ -959,6 +1102,7 @@ function menu_seo_booster_rocket() {
 function add_seo_booster_rocket_menu() {
 	add_menu_page( __('SEO Booster Rocket','seo-booster-rocket'),__('SEO Booster Rocket','seo-booster-rocket'),'administrator','seo-booster-rocket','menu_seo_booster_rocket','dashicons-chart-area',81);
 	add_submenu_page('seo-booster-rocket','SEO Booster Rocket - Places & Maps','Places & Maps','administrator','seo-booster-rocket-places-maps','menu_seo_booster_rocket_admin_places_maps');
+	register_setting( 'seo-booster-rocket-places-maps', 'booster-rocket-facebook-api-key' );
 	register_setting( 'seo-booster-rocket-places-maps', 'booster-rocket-yelp-api-key' );
 	register_setting( 'seo-booster-rocket-places-maps', 'booster-rocket-places-api-key' );
 	register_setting( 'seo-booster-rocket-places-maps', 'booster-rocket-maps-api-key' );
@@ -986,6 +1130,7 @@ class SEO_Booster_Rocket_DB {
 		$this->geo_table = $this->db->prefix."seo_booster_rocket_geo";
 		$this->google_cache_table = $this->db->prefix."seo_booster_rocket_google_cache";
 		$this->yelp_cache_table = $this->db->prefix."set_booster_rocket_yelp_cache";
+		$this->facebook_cache_table = $this->db->prefix."set_booster_rocket_facebook_cache";
 		$this->charset = $this->db->get_charset_collate();
 		$this->geo_data_url="https://websourcegroup.com/download/seo-booster-rocket-geographic-data-backup/";
 	}
@@ -997,6 +1142,9 @@ class SEO_Booster_Rocket_DB {
 	}
 	public function ret_yelp_cache_table() {
 		return $this->yelp_cache_table;
+	}
+	public function ret_facebook_cache_table() {
+		return $this->facebook_cache_table;
 	}
 	public function ret_google_cache_table() {
 		return $this->google_cache_table;
@@ -1015,10 +1163,14 @@ class SEO_Booster_Rocket_DB {
 			$sql="CREATE TABLE ".$this->yelp_cache_table." (state VARCHAR(2) NOT NULL, city VARCHAR(50) NOT NULL, json_response MEDIUMTEXT NOT NULL, date DATE NOT NULL) ENGINE=InnoDB ".$this->charset.";";
 			dbDelta( $sql );
 		}
+		if($this->db->get_var("SHOW TABLES LIKE '".$this->facebook_cache_table."'") != $this->facebook_cache_table) {
+			$sql="CREATE TABLE ".$this->facebook_cache_table." (state VARCHAR(2) NOT NULL, city VARCHAR(50) NOT NULL, json_response MEDIUMTEXT NOT NULL, date DATE NOT NULL) ENGINE=InnoDB ".$this->charset.";";
+			dbDelta( $sql );
+		}
 		return $this->are_tables_installed();
 	}
 	public function are_tables_installed() {
-		if($this->db->get_var("SHOW TABLES LIKE '".$this->geo_table."'") != $this->geo_table || $this->db->get_var("SHOW TABLES LIKE '".$this->google_cache_table."'") != $this->google_cache_table || $this->db->get_var("SHOW TABLES LIKE '".$this->yelp_cache_table."'") != $this->yelp_cache_table) {
+		if($this->db->get_var("SHOW TABLES LIKE '".$this->geo_table."'") != $this->geo_table || $this->db->get_var("SHOW TABLES LIKE '".$this->google_cache_table."'") != $this->google_cache_table || $this->db->get_var("SHOW TABLES LIKE '".$this->yelp_cache_table."'") != $this->yelp_cache_table || $this->db->get_var("SHOW TABLES LIKE '".$this->facebook_cache_table."'") != $this->facebook_cache_table) {
 			return FALSE;
 		}
 		return TRUE;
@@ -1034,6 +1186,12 @@ class SEO_Booster_Rocket_DB {
 	public function geography_data_count() {
 		if($this->are_tables_installed()) {
                         return $this->db->get_var("SELECT COUNT(*) FROM ".$this->geo_table);
+                }
+                return 0;
+	}
+	public function cached_facebook_geography_data_count() {
+		if($this->are_tables_installed()) {
+                        return $this->db->get_var("SELECT COUNT(*) FROM ".$this->facebook_cache_table);
                 }
                 return 0;
 	}
@@ -1062,6 +1220,15 @@ class SEO_Booster_Rocket_DB {
 		if($this->are_tables_installed()) {
 			$this->db->query("DELETE FROM ".$this->yelp_cache_table);
 			if($this->cached_yelp_geography_data_count() == 0) {
+				return TRUE;
+			}
+		}
+		return FALSE;
+	}
+	public function clear_facebook_geography_cache() {
+		if($this->are_tables_installed()) {
+			$this->db->query("DELETE FROM ".$this->facebook_cache_table);
+			if($this->cached_facebook_geography_data_count() == 0) {
 				return TRUE;
 			}
 		}

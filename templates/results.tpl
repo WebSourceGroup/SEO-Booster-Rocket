@@ -4,6 +4,7 @@
 	{include file="search.tpl"}
     {if isset($notice_google)}<h5 id="notice">Google: {$notice_google}</h5>{/if}
     {if isset($notice_yelp)}<h5 id="notice">Yelp: {$notice_yelp}</h5>{/if}
+    {if isset($notice_facebook)}<h5 id="notice">Facebook: {$notice_facebook}</h5>{/if}
     <h5 id="notice">Number of Results: {$results_combined|count}</h5>
     <div id="notice">
 	<a href="#results">Take me to the Results!</a>
@@ -30,12 +31,15 @@
 	</tr>
 
 {foreach from=$results_combined item=result name=count}
-	<tr id="rocket-results">
+	<tr class="rocket-results">
                 <td><a name="{$result['id']}"></a>{$result['name']}</td>
 		<td><a href="https://maps.google.com/maps/place/{$result['name']|escape}/@{$result['latitude']},{$result['longitude']}" target="_blank">{$result['address']}</a></td>
 		<td>{if isset($result['rating'])}{$result['rating']}{/if}</td>
 		<td nowrap>{$result['phone']}</td>
-		<td>{if isset($result['photos'])}{$result['photos']}{/if}</td>
+		<td>
+			{if isset($result['photos'])}{$result['photos']}{/if}
+			{if isset($result['website'])}<br />{$result['website']}{/if}
+				</td>
 	</tr>
 {foreachelse}
 	<tr><td>No Results were Found. Please Try Again</td></tr>
