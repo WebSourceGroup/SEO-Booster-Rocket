@@ -3,7 +3,7 @@
  * Plugin Name: SEO Booster Rocket
  * Plugin URI: https://websourcegroup.com/
  * Description: This plugin provides over 50,000 unique indexable web pages to your Wordpress Website! Uses Google Places API, Google Maps API & Yelp Fusion API to create an industry focused data driven user experience.
- * Version: 1.1.1
+ * Version: 1.1.1.1
  * Author: Web Source Group
  * Author URI: http://websourcegroup.com/seo-booster-rocket-wordpress-plugin-rocket-boost-seo-results/
  * License: GPL2
@@ -107,6 +107,20 @@ class SEO_Booster_Rocket_Geography {
         private function cleanVariable($var) {
 		return sanitize_text_field($var);
         }
+
+	public function retStateList() {
+		return array_merge($this->retStatesShort(),$this->retStatesFull());
+	}
+
+	public function retCityList() {
+		$results = Array();
+                $result = $this->seo_db->db->get_results("SELECT DISTINCT city FROM ".$this->seo_db->ret_geo_table()." ORDER BY city");
+                foreach($result as $res) {
+                        array_push($results,array('name'=>$res->city));
+                }
+                return $results;
+        }
+
 	public function retStateShortName($state_long) {
 		$state_long = $this->cleanVariable($state_long);
 		$result = $this->seo_db->db->get_results("SELECT DISTINCT state_short FROM ".$this->seo_db->ret_geo_table()." WHERE state_full = '$state_long'");
@@ -285,6 +299,7 @@ function register_query_vars($public_query_vars) {
 	$public_query_vars[] = "state";
 	$public_query_vars[] = "county";
 	$public_query_vars[] = "city";
+	$public_query_vars[] = "town";
 	return $public_query_vars;
 }
 
@@ -330,10 +345,12 @@ function seo_booster_rocket_process_requests() {
 		return seo_booster_rocket_map(array());
 	}elseif(isset($wp_query->query_vars['county']) && isset($wp_query->query_vars['state'])) {
 		return ret_seo_cities(array('state'=>htmlspecialchars($wp_query->query_vars['state']),'county'=>htmlspecialchars($wp_query->query_vars['county'])));
+	}elseif(isset($wp_query->query_vars['state']) && isset($wp_query->query_vars['town'])) {
+		return seo_booster_rocket_map(array());
 	}elseif(isset($wp_query->query_vars['state'])) {
 		return ret_seo_counties(array('state'=>htmlspecialchars($wp_query->query_vars['state'])));
 	}else{
-		return ret_seo_state(array('full'=>"true")).ret_seo_state(array());
+		return $retval.ret_seo_state(array('full'=>"true")).ret_seo_state(array());
 	}
 }
 
@@ -368,8 +385,7 @@ class SEO_Booster_Rocket_Places {
 		$this->base_yelp_url = "https://api.yelp.com/v3/businesses/search?";
 		$this->base_facebook_url = "https://graph.facebook.com/v2.11/search?type=place&distance=".$this->max_facebook_distance."&access_token=".urlencode(esc_attr($this->facebook_api_key))."&";
 		$this->place_facebook_url = "https://graph.facebook.com/v2.11/";//{place ID}?fields={place information}";
-		$this->facebook_place_fields = "name,hours,location,overall_star_rating,phone,picture,website";
-		//$this->facebook_place_fields = "name,hours,location,overall_star_rating,phone,photos,picture,website";
+		$this->facebook_place_fields = "name,hours,location,overall_star_rating,rating_count,phone,picture,website,link";
 		$this->text_similarity_tolerance=12;
 		$this->geography_tolerance=0.0005;
 		$this->location_names=Array();
@@ -586,6 +602,7 @@ class SEO_Booster_Rocket_Places {
 					array_push($this->location_names,$record['name']);
 				//}
 			}
+		//print "<!-- "; print_r($results); print " -->";
 		return $results;
 	}
 
@@ -691,14 +708,16 @@ class SEO_Booster_Rocket_Places {
 		return FALSE;
 	}
 	private function merge_records($array_index,$places_array,$place) {
-		if(is_int(intval($place['rating'])) && $place['rating'] <= 5 && $place['rating'] >= 0) {
-			$places_array[$array_index]['rating']=($places_array[$array_index]['rating']+$place['rating'])/2;
+		if(strlen($place['rating']) > 0 && is_int(intval($place['rating'])) && $place['rating'] <= 5 && $place['rating'] >= 0) {
+			if(isset($place['review_count'])) {
+				//print $place['review_count'].' B ';
+			}
+			array_push($places_array[$array_index]['rating'],$place['rating']);
 		}
 		if(strlen($places_array[$array_index]['phone'])==0) {
 			$places_array[$array_index]['phone']=$place['phone'];
 		}
 		$places_array[$array_index]['photos'].="<br />".$place['photos'];
-		//$places_array[$array_index]['']=$place[''];
 		
 		return $places_array;
 	}
@@ -750,9 +769,14 @@ class SEO_Booster_Rocket_Places {
 			//		$tmp_item['is_open']='';
 			//	}
 				if(isset($item['rating'])) { //google, yelp
-					$tmp_item['rating']=$item['rating'];
+					$tmp_item['rating']=array($item['rating']);
 				}elseif(isset($item['overall_star_rating'])) { //facebook
-					$tmp_item['rating']=$item['overall_star_rating'];
+					$tmp_item['rating']=array($item['overall_star_rating']);
+				}
+				if(isset($item['rating_count'])) { //facebook
+					$tmp_item['review_count']=$item['rating_count'];
+				}elseif(isset($item['review_count'])) { //yelp
+					$tmp_item['review_count']=$item['review_count'];
 				}
 
 				if(isset($item['photos'])) { //google
@@ -785,7 +809,16 @@ class SEO_Booster_Rocket_Places {
 					$tmp_item['phone']='';
 				}
 				if(isset($item['website'])) {
-					$tmp_item['website']="<a href='http://".$item['website']."/' target='_blank'>Visit ".$tmp_item['name']."'s Website</a><br />";
+					if(preg_match('//',$item['website'])) {
+						$tmp_item['website']="<a href='".$item['website']."/' target='_blank'>Visit ".$tmp_item['name']."'s Website</a><br />";
+					}else{
+						$tmp_item['website']="<a href='http://".$item['website']."/' target='_blank'>Visit ".$tmp_item['name']."'s Website</a><br />";
+					}
+				}
+				if(isset($item['url'])) {
+					$tmp_item['url']=$item['url']; // yelp
+				}elseif(isset($item['link'])) {
+					$tmp_item['url']=$item['link']; // facebook
 				}
 
 				$dupe_val=$this->is_duplicate($results,$tmp_item);
@@ -807,8 +840,9 @@ add_shortcode('seo_booster_rocket_map','seo_booster_rocket_map');
 function seo_booster_rocket_map( $atts ) {
 	global $wp_query;
 	$places = new SEO_Booster_Rocket_Places();
+	$geo = new SEO_Booster_Rocket_Geography();
 	$retval=$places->smarty->fetch(__DIR__.'/templates/css.tpl');
-
+	
 	$town='';
 	$state='';
 
@@ -841,17 +875,24 @@ function seo_booster_rocket_map( $atts ) {
 			$places->smarty->assign('search_term',get_option('booster-rocket-search-term'));
 		}
 		if(isset($atts['results']) && $atts['results'] == "false") {
+			$places->smarty->assign('state_list',$geo->retStateList());
+			$places->smarty->assign('city_list',$geo->retCityList());
+			$places->smarty->assign('search_uri',esc_attr(get_option('booster-rocket-maps-uri' )));
 			$retval.=$places->smarty->fetch(__DIR__.'/templates/search.tpl');
 		}else{
 			if($places->ret_maps_api_key()) {
 				$places->smarty->assign('maps_api_key',$places->ret_maps_api_key());
 			}
+			$places->smarty->assign('search_uri',esc_attr(get_option('booster-rocket-maps-uri' )));
 			$retval.=$places->smarty->fetch(__DIR__."/templates/results.tpl");
 		}
 	}else{
 		if(get_option('booster-rocket-search-term')) {
 			$places->smarty->assign('search_term',get_option('booster-rocket-search-term'));
 		}
+		$places->smarty->assign('state_list',$geo->retStateList());
+		$places->smarty->assign('city_list',$geo->retCityList());
+		$places->smarty->assign('search_uri',esc_attr(get_option('booster-rocket-maps-uri' )));
 		$places->smarty->display(__DIR__.'/templates/search.tpl');
 	}
 	return $retval;
@@ -1253,5 +1294,12 @@ class SEO_Booster_Rocket_DB {
 		return FALSE;
 	}
 }
+
+class SEO_Booster_Rocket_AJAX {
+        function __construct() {
+
+	}
+}
+
 
 ?>

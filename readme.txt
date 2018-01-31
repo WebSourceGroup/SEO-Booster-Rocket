@@ -5,7 +5,7 @@ Donate link: https://www.paypal.me/SEOBoosterRocket
 Requires at least: 4.9.1
 Tested up to: 4.9.1
 Requires PHP: 5.6.32
-Stable tag: 1.1.1
+Stable tag: 1.1.1.1
 License: GPLv2 or later.
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -64,7 +64,16 @@ You'll also be required to install both a <a href="https://websourcegroup.com/ho
 * Added error handling functionality & improvements.
 * Minor Template updates.
 
+= 1.1.1.1 = 
+* Added a poor mans autocomplete on search form
+* updated what URL is used to link for individual records. Now defaults to the source page, website or google map.
+* added rel="nofollow" for SEO
+* updated bug where search form doesn't point to the correct URI when initially using the State, County & Town navigation.
+
 == Upgrade Notice ==
+
+= 1.1.1.1 =
+Updated no follow, autocomplete lite, other template data.
 
 = 1.1.1 =
 Added support for Facebook Graph API. This updated allows 3 content providers.

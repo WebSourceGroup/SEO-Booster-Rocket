@@ -31,10 +31,17 @@
 	</tr>
 
 {foreach from=$results_combined item=result name=count}
+	<a name="{$result['id']}"></a>
 	<tr class="rocket-results">
-                <td><a name="{$result['id']}"></a>{$result['name']}</td>
-		<td><a href="https://maps.google.com/maps/place/{$result['name']|escape}/@{$result['latitude']},{$result['longitude']}" target="_blank">{$result['address']}</a></td>
-		<td>{if isset($result['rating'])}{$result['rating']}{/if}</td>
+                <td>{$result['name']}</td>
+		<td>
+			{if isset($result['url'])}
+				<a rel="nofollow" href="{$result['url']}" target="_blank">{$result['address']}</a>
+			{else}
+				<a rel="nofollow" href="https://maps.google.com/maps/place/{$result['name']|escape}/@{$result['latitude']},{$result['longitude']}" target="_blank">{$result['address']}</a>
+			{/if} 
+				</td>
+		<td>{math equation="x/y" x=array_sum($result['rating']) y=count($result['rating'])}</td>
 		<td nowrap>{$result['phone']}</td>
 		<td>
 			{if isset($result['photos'])}{$result['photos']}{/if}

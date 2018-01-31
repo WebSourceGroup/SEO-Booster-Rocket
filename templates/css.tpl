@@ -19,7 +19,7 @@
 		margin: 5px;
 	}
 
-        #legend, #notice, #right, #searchform {
+        #legend, #notice, #right, #search_form {
 		border-radius: 10px;
 		background: #f0f0f0;
 		padding: 5px;
@@ -32,6 +32,6 @@
                 width: 100%;
                 border-width: 1px;
         }
-        #searchform p, #right h5, #searchform h5 { margin: 5px; padding: 5px; }
+        #searchform p, #right h5, #search_form h5 { margin: 5px; padding: 5px; }
 </style>
 {/literal}
