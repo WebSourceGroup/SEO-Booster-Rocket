@@ -338,6 +338,39 @@ function seo_booster_rocket_rewrite_rule() {
 	#print "AAAAAAA";
 }
 
+//add_action('template_redirect','disable_wpseo');
+function disable_wpseo() { //yoast seo conflicts with updating title. This doesn't work to correct this.
+	$uri=esc_attr(get_option('booster-rocket-maps-uri'));
+	if(substr($_SERVER['REQUEST_URI'],0,strlen($uri)) == $uri) {
+		global $wpseo_front;
+		if(defined($wpseo_front)){
+			remove_action('wp_head',array($wpseo_front,'head'),1);
+		}else{
+			$wp_thing = WPSEO_Frontend::get_instance();
+			remove_action('wp_head',array($wp_thing,'head'),1);
+		}
+	}
+}
+
+add_filter('pre_get_document_title','update_page_title');
+function update_page_title() {
+	global $wp_query;
+	$uri=esc_attr(get_option('booster-rocket-maps-uri'));
+	if(substr($_SERVER['REQUEST_URI'],0,strlen($uri)) == $uri) {
+		$term=esc_attr(get_option('booster-rocket-search-term'));
+		if(isset($wp_query->query_vars['city']) && isset($wp_query->query_vars['county']) && isset($wp_query->query_vars['state'])) {
+			return "Find a ".$term." in ".htmlspecialchars($wp_query->query_vars['city']).", ".htmlspecialchars($wp_query->query_vars['state']); //add a place for county.
+		}elseif(isset($wp_query->query_vars['state']) && isset($wp_query->query_vars['town'])) {
+			return "Find a ".$term." in ".htmlspecialchars($wp_query->query_vars['town']).", ".htmlspecialchars($wp_query->query_vars['state']);
+		}elseif(isset($wp_query->query_vars['county']) && isset($wp_query->query_vars['state'])) {
+			return "Find a ".$term." in ".htmlspecialchars($wp_query->query_vars['county'])." County, ".htmlspecialchars($wp_query->query_vars['state']);
+		}elseif(isset($wp_query->query_vars['state'])) {
+			return "Find a ".$term." in ".htmlspecialchars($wp_query->query_vars['state']);
+		}
+		return $wp_query->post->post_title;
+	}
+}
+
 add_shortcode('seo_booster_rocket_process_requests','seo_booster_rocket_process_requests');
 function seo_booster_rocket_process_requests() {
 	global $wp_query;

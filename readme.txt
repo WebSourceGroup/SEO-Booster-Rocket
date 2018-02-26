@@ -1,6 +1,6 @@
 === SEO Booster Rocket ===
 Contributors: WebSourceGroup
-Tags: Booster Rocket, SEO, SEO Boost, Places, Maps, Google, Search Engine Optimization, API, Booster Rocket, US Map, Sitemap, Geography, US State, US City, US County, USA Map, US Geography, Yelp, Fusion API
+Tags: Booster Rocket, SEO, SEO Boost, Places, Maps, Google, Search Engine Optimization, API, Booster Rocket, US Map, Sitemap, Geography, US State, US City, US County, USA Map, US Geography, Yelp, Fusion API, Facebook API, Graph API
 Donate link: https://www.paypal.me/SEOBoosterRocket
 Requires at least: 4.9.1
 Tested up to: 4.9.1
@@ -9,12 +9,12 @@ Stable tag: 1.1.1.1
 License: GPLv2 or later.
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-The SEO Booster Rocket is used to increase your Wordpress Websites SEO Footprint & Functionality. It currently uses Google Places API, Google Maps API & Yelp Fusion API to create over 50,000 additional unique indexable URL's. These URL's are created by picking a search term (ex: Yoga Studios) and allows a user/search engine the ability to navigate to results by State, County & City. This system only supports US Geographies at this time. By using this software you agree that you are using this software at your Own Risk and that this software provides no guarantees. This plugin supports two short codes: [seo_booster_rocket_process_requests] &amp; [seo_booster_rocket_map]
+The SEO Booster Rocket is used to increase your Wordpress Websites SEO Footprint & Functionality. It currently uses Google Places API, Google Maps API, Facebook Graph API & Yelp Fusion API to create over 50,000 additional unique indexable URL's. These URL's are created by picking a search term (ex: Yoga Studios) and allows a user/search engine the ability to navigate to results by State, County & City. This system only supports US Geographies at this time. By using this software you agree that you are using this software at your Own Risk and that this software provides no guarantees. This plugin supports two short codes: [seo_booster_rocket_process_requests] &amp; [seo_booster_rocket_map]
 
 == Description ==
 Do you need to provide additional URL's to search engines like Google or Bing? Does your website have less than 20 pages but you'd wish to have 50,000? Is your website's content themed to include searchable Google Map Business Listings for every US State, County, and City? If you've answered yes to any of these questions then this SEO Boster Rocket might put your website into orbit.
 
-The SEO Booster Rocket plugin uses the Google Places API, the Google Maps API & the Yelp Fusion API and merges this data together. It creates a single result for each location record from multiple data sources. This plugin also makes use of a database containing every US State, County, and Town, which can be downloaded after installation. These State, County, Town database increases the searchable footprint of your web site by adding over 50,000 unique web pages! Once you fill in the Places API, Maps API, Yelp API, Search Results URI & set your preferred Keyword you'll be able to submit an additional sitemap to your preferred search engine resulting in a massive increase of indexable pages!
+The SEO Booster Rocket plugin uses the Google Places API, the Google Maps API, Facebook Graph API & the Yelp Fusion API and merges this data together. It creates a single result for each location record from multiple data sources. This plugin also makes use of a database containing every US State, County, and Town, which can be downloaded after installation. These State, County, Town database increases the searchable footprint of your web site by adding over 50,000 unique web pages! Once you fill in the Places API, Maps API, Yelp API, Facebook Graph API, Search Results URI & set your preferred Keyword you'll be able to submit an additional sitemap to your preferred search engine resulting in a massive increase of indexable pages!
 
 For a live example of this plugin please visit: <a href="https://usayo.ga/find-yoga-studio-by-geography/" target="_blank">USA Yoga</a>
 
@@ -22,13 +22,17 @@ This plugin has only been test with Wordpress version 4.9.1 but is highly likely
 
 Please be aware that we're interested in your feedback so we can deliver you the best, and most useful, plugin possible.
 
+All product names, logos, and brands are property of their respective owners. All company, product and service names used in this website are for identification purposes only. Use of these names, logos, and brands does not imply endorsement.
+
+The Software Is Provided "As Is", Without Warranty Of Any Kind, Express Or Implied, Including But Not Limited To The Warranties Of Merchantability, Fitness For A Particular Purpose And Noninfringement.
+
 == Installation ==
 
 = Traditional Option =
 
 Installation Instructions:
 1) Download the plugin and unzip it.
-2) Put the ‘search-everything’ directory into your wp-content/plugins/ directory.
+2) Put the ‘SEO-Booster-Rocket’ directory into your wp-content/plugins/ directory.
 3) Go to the Plugins page in your WordPress Administration area and click ‘Activate’ next to Search Everything.
 4) Go to the Settings > Search Everything and configure it.
 5) That’s it. Enjoy searching.
@@ -38,7 +42,7 @@ Installation Instructions:
 2) Click Active
 
 = Either Way =
-You'll also be required to install both a <a href="https://websourcegroup.com/how-to-get-a-google-places-api-key/" target="blank">Google Places API Key<a/> & a <a href="https://websourcegroup.com/how-to-get-a-google-maps-api-key/" target="blank">Google Maps Javascript API Key</a>. You'll also need to hard code a page URI that is used to the Wordpress Rewrite API.
+You'll also be required to install both a <a href="https://websourcegroup.com/how-to-get-a-google-places-api-key/" target="_blank">Google Places API Key<a/> & a <a href="https://websourcegroup.com/how-to-get-a-google-maps-api-key/" target="_blank">Google Maps Javascript API Key</a>, <a href="https://websourcegroup.com/how-to-get-a-facebook-graph-access-token/" target="_blank">Facebook Graph API Key</a> & a <a href="https://websourcegroup.com/how-to-get-a-yelp-fusion-api-key/" target="_blank">Yelp Fushion API</a>. You'll also need to hard code a page URI that is used to the Wordpress Rewrite API.
 
 == Changelog ==
 = 1.0 = 
