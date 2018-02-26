@@ -12,8 +12,7 @@ You'll need to sign up for google api console and enable a Places API. You'll pu
 
 ### Installing
 
-Follow these instructions to determine which way you'd like to install this plugin.
-	- http://www.wpbeginner.com/beginners-guide/step-by-step-guide-to-install-a-wordpress-plugin-for-beginners/
+Please refer to the official Wordpress Plugin Page for SEO Booster Rocket: https://wordpress.org/plugins/SEO-Booster-Rocket/
 
 ## Built With
 

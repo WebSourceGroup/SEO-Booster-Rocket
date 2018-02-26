@@ -3,9 +3,9 @@ Contributors: WebSourceGroup
 Tags: Booster Rocket, SEO, SEO Boost, Places, Maps, Google, Search Engine Optimization, API, Booster Rocket, US Map, Sitemap, Geography, US State, US City, US County, USA Map, US Geography, Yelp, Fusion API, Facebook API, Graph API
 Donate link: https://www.paypal.me/SEOBoosterRocket
 Requires at least: 4.9.1
-Tested up to: 4.9.1
+Tested up to: 4.9.4
 Requires PHP: 5.6.32
-Stable tag: 1.1.1.1
+Stable tag: 1.1.1.2
 License: GPLv2 or later.
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -74,7 +74,13 @@ You'll also be required to install both a <a href="https://websourcegroup.com/ho
 * added rel="nofollow" for SEO
 * updated bug where search form doesn't point to the correct URI when initially using the State, County & Town navigation.
 
+= 1.1.1.2 =
+* Added dynamic page title functionality based on selected Geography. This is for SEO purposes.
+
 == Upgrade Notice ==
+
+= 1.1.1.2 =
+SEO Improvements when selecting Geography.
 
 = 1.1.1.1 =
 Updated no follow, autocomplete lite, other template data.
